@@ -62,10 +62,12 @@ The following keybinds are active when preview window is focused:
 
 | key ||
 |-|-|
-| k | scroll up         |
-| j | scroll down       |
-| g | scroll to top     |
-| G | scroll to bottom  |
+| k | scroll up               |
+| j | scroll down             |
+| u | scroll up half a page   |
+| d | scroll down half a page |
+| g | scroll to top           |
+| G | scroll to bottom        |
 
 ### :mag: Preview window
 
