@@ -137,7 +137,12 @@ addEventListener('DOMContentLoaded', () => {
         `<div>${data.html}</div>`,
         {
           childrenOnly: true,
-          onBeforeElUpdated: (fromEl: HTMLElement, toEl: HTMLElement) => !fromEl.isEqualNode(toEl),
+          onBeforeElUpdated: (fromEl: HTMLElement, toEl: HTMLElement) => {
+            if (fromEl.hasAttribute('open')) {
+              toEl.setAttribute('open', 'true');
+            }
+            return !fromEl.isEqualNode(toEl);
+          },
           getNodeKey: () => null,
         },
       );
