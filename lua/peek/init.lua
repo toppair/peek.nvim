@@ -53,7 +53,7 @@ local function open(bufnr)
     end,
   })
 
-  nvim_create_autocmd('CursorMoved', {
+  nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
     group = augroup,
     buffer = bufnr,
     callback = function()
@@ -71,22 +71,11 @@ local function open(bufnr)
     })
   end
 
-  if config.get('update_in_insert') then
-    nvim_create_autocmd('CursorHold', {
+  if config.get('update_on_change') then
+    nvim_create_autocmd({ 'TextChanged', 'TextChangedI', 'TextChangedP' }, {
       group = augroup,
       buffer = bufnr,
-      callback = function()
-        show()
-      end,
-    })
-
-    nvim_create_autocmd('CursorMovedI', {
-      group = augroup,
-      buffer = bufnr,
-      callback = function()
-        show()
-        app.scroll(line('.'))
-      end,
+      callback = show,
     })
   end
 

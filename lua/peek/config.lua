@@ -5,7 +5,7 @@ local config = {
   close_on_bdelete = true,
   syntax = true,
   theme = 'dark',
-  update_in_insert = true,
+  update_on_change = true,
   throttle_at = 200000,
   throttle_time = 'auto',
 }
@@ -37,10 +37,22 @@ function module.setup(incoming)
     auto_load = { incoming.auto_load, 'boolean', true },
     syntax = { incoming.syntax, 'boolean', true },
     theme = { incoming.theme, optional(one_of({ 'dark', 'light' })), 'theme name' },
+    update_on_change = { incoming.update_on_change, 'boolean', true },
+    -- TODO: deprecated, should be removed after sometime
     update_in_insert = { incoming.update_in_insert, 'boolean', true },
     throttle_at = { incoming.throttle_at, 'number', true },
     throttle_time = { incoming.throttle_time, 'number', true },
   })
+
+  if incoming.update_in_insert ~= nil then
+    vim.api.nvim_notify(
+      'peek.nvim: the config option update_in_insert has been deprecated, use update_on_change instead.',
+      vim.log.levels.WARN,
+      {}
+    )
+    incoming.update_on_change = incoming.update_in_insert
+    incoming.update_in_insert = nil
+  end
 
   config = vim.tbl_extend('force', config, incoming)
 end
