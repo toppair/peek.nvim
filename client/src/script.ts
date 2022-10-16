@@ -73,6 +73,12 @@ function setKeybinds() {
       case 'k':
         window.scrollBy({ top: -50 });
         break;
+      case 'd':
+        window.scrollBy({ top: window.innerHeight / 2 });
+        break;
+      case 'u':
+        window.scrollBy({ top: -window.innerHeight / 2 });
+        break;
       case 'g':
         window.scrollTo({ top: 0 });
         break;
