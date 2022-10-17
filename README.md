@@ -33,9 +33,9 @@ require('peek').setup({
 
   theme = 'dark',           -- 'dark' or 'light'
 
-  update_in_insert = true,
+  update_on_change = true,
 
-  -- relevant if update_in_insert == true
+  -- relevant if update_on_change is true
   throttle_at = 200000,     -- start throttling when file exceeds this
                             -- amount of bytes in size
   throttle_time = 'auto',   -- minimum amount of time in milliseconds
