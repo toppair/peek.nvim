@@ -77,27 +77,31 @@ awaitConnection(listener).then((socket) => {
   };
 });
 
-const webview = new Worker(new URL('webview.js', Deno.mainModule).href, {
-  type: 'module',
-  name: 'webview',
+const addr = listener.addr as Deno.NetAddr;
+
+const webview = Deno.run({
+  cwd: dirname(new URL(Deno.mainModule).pathname),
+  cmd: [
+    'deno',
+    'run',
+    '--quiet',
+    '--allow-read',
+    '--allow-env',
+    '--allow-ffi',
+    '--unstable',
+    '--no-check',
+    'webview.js',
+    `--url=${new URL('index.html', Deno.mainModule).href}`,
+    `--theme=${__args['theme']}`,
+    `--serverUrl=${addr.hostname}:${addr.port}`,
+  ],
+  stdin: 'null',
 });
 
-webview.onmessage = (event) => {
-  if (event.data === 'close') {
-    logger.info('webview closed');
-    return void Deno.exit();
-  }
-
-  logger.info('webview worker ready');
-
-  const addr = listener.addr as Deno.NetAddr;
-
-  webview.postMessage({
-    url: new URL('index.html', Deno.mainModule).href,
-    theme: __args['theme'],
-    serverUrl: `${addr.hostname}:${addr.port}`,
-  });
-};
+webview.status().then((status) => {
+  logger.info(`webview closed, code: ${status.code}`);
+  Deno.exit();
+});
 
 for (
   const signal of [
