@@ -1,7 +1,40 @@
 const flags = [];
+const DEBUG = Deno.env.get('DEBUG');
 
 if (Deno.env.get('FAST')) {
   flags.push('--no-check', '--quiet');
+}
+
+function logPublicContent() {
+  console.table(
+    Array.from(Deno.readDirSync('public')).reduce((table, entry) => {
+      const { size, mtime } = Deno.statSync('public/' + entry.name);
+
+      table[entry.name] = {
+        size,
+        modified: new Date(mtime).toLocaleTimeString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hourCycle: 'h23',
+          fractionalSecondDigits: 3,
+        }),
+      };
+
+      return table;
+    }, {}),
+  );
+}
+
+if (DEBUG) {
+  logPublicContent();
+
+  await Deno.run({
+    cmd: ['git', 'branch', '--all'],
+  }).status();
 }
 
 const result = Promise.all([
@@ -39,6 +72,8 @@ const result = Promise.all([
   })(),
 ]);
 
-result.catch((reason) => {
-  console.error(reason);
-});
+result.catch(console.error);
+
+if (DEBUG) {
+  result.then(logPublicContent);
+}

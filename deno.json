@@ -1,8 +1,9 @@
 {
   "tasks": {
-    "build": "deno run --allow-run --allow-net --allow-read=. --allow-write=. --allow-env --no-check scripts/build.js",
+    "build": "deno run --allow-run --allow-net --allow-read --allow-write --allow-env --no-check scripts/build.js",
     "build:watch": "deno task build --watch",
     "build:fast": "FAST=true deno task --quiet build",
+    "build:debug": "DEBUG=true deno task build",
     "run": "deno run --allow-read --allow-write --allow-net --allow-env --allow-ffi --unstable --no-check public/main.bundle.js",
     "start": "deno task build && deno task run --syntax",
     "start:dev": "DENO_ENV=development deno task start"
