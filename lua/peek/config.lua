@@ -41,7 +41,7 @@ function module.setup(incoming)
     -- TODO: deprecated, should be removed after sometime
     update_in_insert = { incoming.update_in_insert, 'boolean', true },
     throttle_at = { incoming.throttle_at, 'number', true },
-    throttle_time = { incoming.throttle_time, 'number', true },
+    throttle_time = { incoming.throttle_time, 'string', true },
   })
 
   if incoming.update_in_insert ~= nil then
