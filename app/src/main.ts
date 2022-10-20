@@ -25,6 +25,9 @@ async function awaitConnection(listener: Deno.Listener) {
 }
 
 const listener = Deno.listen({ port: 0 });
+const addr = listener.addr as Deno.NetAddr;
+
+logger.info(`listening on ${addr.hostname}:${addr.port}`);
 
 awaitConnection(listener).then((socket) => {
   logger.info('connection');
@@ -76,8 +79,6 @@ awaitConnection(listener).then((socket) => {
     })();
   };
 });
-
-const addr = listener.addr as Deno.NetAddr;
 
 const webview = Deno.run({
   cwd: dirname(new URL(Deno.mainModule).pathname),
