@@ -8,6 +8,9 @@ import { default as MarkdownItEmoji } from 'https://esm.sh/markdown-it-emoji@2.0
 import { default as MarkdownItFootnote } from 'https://esm.sh/markdown-it-footnote@3.0.3?no-dts';
 // @deno-types="./markdownit_plugin.d.ts"
 import { default as MarkdownItTaskLists } from 'https://esm.sh/markdown-it-task-lists@2.1.1?no-dts';
+// @deno-types="./markdownit_plugin.d.ts"
+import { default as MarkdownItTexmath } from 'https://esm.sh/markdown-it-texmath@1.0.0?no-dts';
+import Katex from 'https://esm.sh/katex@0.16.3?no-dts';
 
 const __args = parse(Deno.args);
 
@@ -27,7 +30,12 @@ const md = new MarkdownIt('default', {
   }),
 }).use(MarkdownItEmoji)
   .use(MarkdownItFootnote)
-  .use(MarkdownItTaskLists, { enabled: false, label: true });
+  .use(MarkdownItTaskLists, { enabled: false, label: true })
+  .use(MarkdownItTexmath, {
+    engine: Katex,
+    delimiters: ['dollars', 'gitlab'],
+    katexOptions: { macros: { '\\R': '\\mathbb{R}' } },
+  });
 
 md.renderer.rules.link_open = (tokens, idx, options) => {
   const token = tokens[idx];
