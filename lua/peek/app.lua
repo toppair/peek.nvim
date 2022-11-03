@@ -51,6 +51,9 @@ function module.init(on_exit)
       vim.fn.jobstop(channel)
       local content = table.concat(err, '\n'):gsub('\27[[0-9;]*m', '')
       if content:len() > 0 then
+        if content:match("assertion 'main_loops != NULL' failed") then
+          return
+        end
         vim.api.nvim_notify('Peek error: ' .. content, vim.log.levels.ERROR, {})
       end
     end,
