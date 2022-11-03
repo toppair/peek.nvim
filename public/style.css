@@ -27,6 +27,44 @@ body::-webkit-scrollbar-thumb {
     padding: 15px 15px 30px 15px;
   }
 }
+@keyframes pulse {
+  from {
+    scale: 0;
+  }
+  to {
+    scale: 1;
+  }
+}
+.loader {
+  position: absolute;
+  display: flex;
+  width: 40px;
+  top: 50%;
+  left: 50%;
+  justify-content: space-between;
+  translate: -50% -50%;
+}
+.loader::before,
+.loader::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: blue;
+  animation: 0.5s linear infinite alternate pulse;
+}
+.loader::after {
+  animation-direction: alternate-reverse;
+}
+.marker {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  top: 50%;
+  left: 5px;
+  border-radius: 50%;
+  background-color: blue;
+}
 .hljs-doctag,
 .hljs-keyword,
 .hljs-meta .hljs-keyword,
