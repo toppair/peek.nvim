@@ -23,7 +23,9 @@ const md = new MarkdownIt('default', {
     if (language && highlight.getLanguage(language)) {
       try {
         return highlight.highlight(code, { language }).value;
-      } catch (_) { /**/ }
+      } catch {
+        return code;
+      }
     }
 
     return '';
