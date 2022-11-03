@@ -27,16 +27,21 @@ end
 
 function module.setup()
   local sep = vim.loop.os_uname().sysname:match('Windows') and '\\' or '/'
+  local args = {
+    '--logfile=' .. string.format('%s%speek.log', vim.fn.stdpath('log'), sep),
+    '--theme=' .. config.get('theme'),
+  }
 
-  cmd = {
+  if config.get('syntax') then
+    table.insert(args, '--syntax')
+  end
+
+  cmd = vim.list_extend({
     'deno',
     'task',
     '--quiet',
     'run',
-    '--logfile=' .. string.format('%s%speek.log', vim.fn.stdpath('log'), sep),
-    config.get('syntax') and '--syntax' or '',
-    '--theme=' .. config.get('theme'),
-  }
+  }, args)
 end
 
 function module.init(on_exit)
