@@ -21,7 +21,17 @@ end
 
 local function one_of(values)
   return function(value)
-    return type(values) == 'table' and vim.tbl_contains(values, value), 'one of: ' .. table.concat(values, ', ')
+    for _, predicate in pairs(values) do
+      if (type(predicate) == 'function' and predicate(value)) or value == predicate then
+        return true
+      end
+    end
+  end
+end
+
+local function of_type(t)
+  return function(value)
+    return type(value) == t
   end
 end
 
@@ -36,12 +46,12 @@ function module.setup(incoming)
     close_on_bdelete = { incoming.close_on_bdelete, 'boolean', true },
     auto_load = { incoming.auto_load, 'boolean', true },
     syntax = { incoming.syntax, 'boolean', true },
-    theme = { incoming.theme, optional(one_of({ 'dark', 'light' })), 'theme name' },
+    theme = { incoming.theme, optional(one_of({ 'dark', 'light' })), '"dark" or "light"' },
     update_on_change = { incoming.update_on_change, 'boolean', true },
     -- TODO: deprecated, should be removed after sometime
     update_in_insert = { incoming.update_in_insert, 'boolean', true },
     throttle_at = { incoming.throttle_at, 'number', true },
-    throttle_time = { incoming.throttle_time, 'number', true },
+    throttle_time = { incoming.throttle_time, optional(one_of({ 'auto', of_type('number') })), '"auto" or number' },
   })
 
   if incoming.update_in_insert ~= nil then
