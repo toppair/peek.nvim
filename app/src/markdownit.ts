@@ -1,3 +1,4 @@
+import { hashCode, uniqueIdGen } from './util.ts';
 import { parse } from 'https://deno.land/std@0.159.0/flags/mod.ts';
 import { default as highlight } from 'https://cdn.skypack.dev/highlight.js@11.6.0';
 // @deno-types="https://cdn.skypack.dev/@types/markdown-it@12.2.3?dts"
@@ -95,6 +96,38 @@ md.renderer.rules.math_block_eqno = (() => {
   };
 })();
 
+md.renderer.rules.fence = (() => {
+  const fence = md.renderer.rules.fence!;
+  const escapeHtml = md.utils.escapeHtml;
+  const regex = new RegExp(
+    /flowchart|sequenceDiagram|gantt|classDiagram|stateDiagram|pie|journey|C4Context|erDiagram|requirementDiagram|gitGraph/,
+  );
+
+  return (tokens, idx, options, env, self) => {
+    const token = tokens[idx];
+    const content = token.content.trim();
+
+    if (regex.test(content)) {
+      return `
+        <div
+          class="mermaid"
+          data-line-begin="${token.attrGet('data-line-begin')}"
+        >
+          <div
+            id="graph-mermaid-${env.genId(hashCode(content))}"
+            data-graph="mermaid"
+            data-graph-definition="${escapeHtml(content)}"
+          >
+            <div class="loader"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    return fence(tokens, idx, options, env, self);
+  };
+})();
+
 export function render(markdown: string) {
   const tokens = md.parse(markdown, {});
 
@@ -104,5 +137,5 @@ export function render(markdown: string) {
     }
   });
 
-  return md.renderer.render(tokens, md.options, {});
+  return md.renderer.render(tokens, md.options, { genId: uniqueIdGen() });
 }

@@ -1,5 +1,8 @@
+import { debounce } from './util.ts';
 import { slidingWindows } from 'https://deno.land/std@0.159.0/collections/sliding_windows.ts';
+// @deno-types="https://raw.githubusercontent.com/patrick-steele-idem/morphdom/master/index.d.ts"
 import morphdom from 'https://esm.sh/morphdom@2.6.1?no-dts';
+import mermaid from './mermaid.ts';
 
 // const _log = Reflect.get(window, '_log');
 
@@ -39,6 +42,7 @@ addEventListener('DOMContentLoaded', () => {
 
   let source: { lcount: number };
   let blocks: HTMLElement[][];
+  let scroll: { line: number };
 
   const decoder = new TextDecoder();
   const socket = new WebSocket(`ws://${peek.serverUrl}/`);
@@ -64,30 +68,79 @@ addEventListener('DOMContentLoaded', () => {
   };
 
   const onPreview = (() => {
-    const observer = new MutationObserver(() => {
+    mermaid.init();
+
+    const renderMermaid = debounce(
+      (() => {
+        async function render(el: Element) {
+          const svg = await mermaid.render(
+            `${el.id}-svg`,
+            el.getAttribute('data-graph-definition')!,
+            el,
+          );
+
+          if (svg) el.innerHTML = svg;
+
+          el.parentElement!.style.setProperty(
+            'height',
+            window.getComputedStyle(el.parentElement!).getPropertyValue('height'),
+          );
+        }
+
+        return () => {
+          markdownBody.querySelectorAll('div[data-graph="mermaid"]:not(:has(svg))').forEach(render);
+        };
+      })(),
+      200,
+    );
+
+    const morphdomOptions: Parameters<typeof morphdom>[2] = {
+      childrenOnly: true,
+      getNodeKey: (node) => {
+        if (node instanceof HTMLElement && node.getAttribute('data-graph') === 'mermaid') {
+          return node.id;
+        }
+        return null;
+      },
+      onNodeAdded: (node) => {
+        if (node instanceof HTMLElement && node.getAttribute('data-graph') === 'mermaid') {
+          renderMermaid();
+        }
+        return node;
+      },
+      onBeforeElUpdated: (fromEl: HTMLElement, toEl: HTMLElement) => {
+        if (fromEl.hasAttribute('open')) {
+          toEl.setAttribute('open', 'true');
+        } else if (fromEl.classList.contains('mermaid') && toEl.classList.contains('mermaid')) {
+          toEl.style.height = fromEl.style.height;
+        }
+        return !fromEl.isEqualNode(toEl);
+      },
+      onBeforeElChildrenUpdated(_, toEl) {
+        return toEl.getAttribute('data-graph') !== 'mermaid';
+      },
+    };
+
+    const mutationObserver = new MutationObserver(() => {
       blocks = slidingWindows(Array.from(document.querySelectorAll('[data-line-begin]')), 2, {
         step: 1,
         partial: true,
       });
     });
 
-    observer.observe(markdownBody, { childList: true });
+    const resizeObserver = new ResizeObserver(() => {
+      onScroll(scroll);
+    });
+
+    mutationObserver.observe(markdownBody, { childList: true });
+    resizeObserver.observe(markdownBody);
 
     return (data: { html: string; lcount: number }) => {
       source = { lcount: data.lcount };
       morphdom(
         markdownBody,
-        `<div>${data.html}</div>`,
-        {
-          childrenOnly: true,
-          onBeforeElUpdated: (fromEl: HTMLElement, toEl: HTMLElement) => {
-            if (fromEl.hasAttribute('open')) {
-              toEl.setAttribute('open', 'true');
-            }
-            return !fromEl.isEqualNode(toEl);
-          },
-          getNodeKey: () => null,
-        },
+        `<main>${data.html}</main>`,
+        morphdomOptions,
       );
     };
   })();
@@ -110,6 +163,8 @@ addEventListener('DOMContentLoaded', () => {
     }
 
     return (data: { line: number }) => {
+      scroll = data;
+
       const block = getBlockOnLine(data.line) || blocks[0];
       const target = block[0];
       const next = target ? block[1] : blocks[0][0];

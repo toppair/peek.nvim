@@ -46,7 +46,7 @@ body::-webkit-scrollbar-thumb {
 }
 .loader::before,
 .loader::after {
-  content: "";
+  content: '';
   width: 10px;
   height: 10px;
   border-radius: 50%;
@@ -64,6 +64,26 @@ body::-webkit-scrollbar-thumb {
   left: 5px;
   border-radius: 50%;
   background-color: blue;
+}
+div.mermaid {
+  margin-top: 0;
+  margin-bottom: 16px;
+  padding: 16px;
+  border-radius: 6px;
+  overflow: auto;
+  line-height: 1.45;
+  font-size: 85%;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+  word-wrap: normal;
+  background-color: var(--color-canvas-subtle);
+}
+div.mermaid:has(svg) {
+  height: auto !important;
+}
+div[data-graph='mermaid']:has(> .loader) {
+  position: relative;
+  height: 100%;
+  min-height: 50px;
 }
 .hljs-doctag,
 .hljs-keyword,
