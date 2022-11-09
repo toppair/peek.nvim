@@ -67,6 +67,34 @@ md.renderer.rules.heading_open = (tokens, idx, options) => {
   return md.renderer.renderToken(tokens, idx, options);
 };
 
+md.renderer.rules.math_block = (() => {
+  const math_block = md.renderer.rules.math_block!;
+
+  return (tokens, idx, options, env, self) => {
+    return `
+      <div
+        data-line-begin="${tokens[idx].attrGet('data-line-begin')}"
+      >
+        ${math_block(tokens, idx, options, env, self)}
+      </div>
+    `;
+  };
+})();
+
+md.renderer.rules.math_block_eqno = (() => {
+  const math_block_eqno = md.renderer.rules.math_block_eqno!;
+
+  return (tokens, idx, options, env, self) => {
+    return `
+      <div
+        data-line-begin="${tokens[idx].attrGet('data-line-begin')}"
+      >
+        ${math_block_eqno(tokens, idx, options, env, self)}
+      </div>
+    `;
+  };
+})();
+
 export function render(markdown: string) {
   const tokens = md.parse(markdown, {});
 

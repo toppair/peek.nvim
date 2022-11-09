@@ -9,6 +9,7 @@
 - live update
 - synchronized scrolling
 - github-style look
+- [TeX](https://github.com/KaTeX/KaTeX) math
 
 ### :battery: Requirements
 
@@ -47,9 +48,9 @@ require('peek').setup({
 
 | method ||
 |-|-|
-| open    | Open preview window                               |
-| close   | Close preview window                              |
-| is_open | Returns true if preview window is currently open  |
+| open    | Open preview window                                 |
+| close   | Close preview window                                |
+| is_open | Returns `true` if preview window is currently open  |
 
 Example command setup:
 

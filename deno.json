@@ -9,11 +9,7 @@
     "start:dev": "DENO_ENV=development deno task start"
   },
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "deno.ns",
-      "deno.unstable"
-    ]
+    "lib": ["dom", "deno.ns", "deno.unstable"]
   },
   "fmt": {
     "options": {
