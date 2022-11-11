@@ -40,9 +40,9 @@ addEventListener('DOMContentLoaded', () => {
 
   setKeybinds();
 
-  let source: { lcount: number };
-  let blocks: HTMLElement[][];
-  let scroll: { line: number };
+  let source: { lcount: number } | undefined;
+  let blocks: HTMLElement[][] | undefined;
+  let scroll: { line: number } | undefined;
 
   const decoder = new TextDecoder();
   const socket = new WebSocket(`ws://${peek.serverUrl}/`);
@@ -129,7 +129,7 @@ addEventListener('DOMContentLoaded', () => {
     });
 
     const resizeObserver = new ResizeObserver(() => {
-      onScroll(scroll);
+      if (scroll) onScroll(scroll);
     });
 
     mutationObserver.observe(markdownBody, { childList: true });
@@ -147,7 +147,7 @@ addEventListener('DOMContentLoaded', () => {
 
   const onScroll = (() => {
     function getBlockOnLine(line: number) {
-      return blocks.findLast((block) => line >= Number(block[0].dataset.lineBegin));
+      return blocks?.findLast((block) => line >= Number(block[0].dataset.lineBegin));
     }
 
     function getOffset(elem: HTMLElement): number {
@@ -164,6 +164,8 @@ addEventListener('DOMContentLoaded', () => {
 
     return (data: { line: number }) => {
       scroll = data;
+
+      if (!blocks || !source) return;
 
       const block = getBlockOnLine(data.line) || blocks[0];
       const target = block[0];
