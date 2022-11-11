@@ -14,7 +14,7 @@ local module = {}
 local augroup, throttle_at, throttle_time, initialized
 
 local function get_buf_content(bufnr)
-  return concat(nvim_buf_get_lines(bufnr, 0, -1, false), '\n')
+  return concat(nvim_buf_get_lines(bufnr, 0, -1, false), '\n'):gsub('%s*$', '')
 end
 
 local function open(bufnr)
