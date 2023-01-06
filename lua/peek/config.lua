@@ -8,6 +8,7 @@ local config = {
   update_on_change = true,
   throttle_at = 200000,
   throttle_time = 'auto',
+  filetype = { 'markdown' },
 }
 
 local function optional(predicate)
@@ -52,6 +53,7 @@ function module.setup(incoming)
     update_in_insert = { incoming.update_in_insert, 'boolean', true },
     throttle_at = { incoming.throttle_at, 'number', true },
     throttle_time = { incoming.throttle_time, optional(one_of({ 'auto', of_type('number') })), '"auto" or number' },
+    filetype = { incoming.filetype, 'table' },
   })
 
   if incoming.update_in_insert ~= nil then
