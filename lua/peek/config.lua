@@ -9,6 +9,7 @@ local config = {
   throttle_at = 200000,
   throttle_time = 'auto',
   app = 'webview',
+  filetype = { 'markdown' },
 }
 
 local function optional(predicate)
@@ -68,6 +69,7 @@ function module.setup(incoming)
     throttle_at = { incoming.throttle_at, 'number', true },
     throttle_time = { incoming.throttle_time, optional(one_of({ 'auto', of_type('number') })), '"auto" or number' },
     app = { incoming.app, optional(one_of({ of_type('string'), every(of_type('string')) })), 'string or string[]' },
+    filetype = { incoming.filetype, 'table' },
   })
 
   if incoming.update_in_insert ~= nil then

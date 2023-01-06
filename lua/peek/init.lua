@@ -102,9 +102,14 @@ end
 
 module.open = ensure_init(function()
   local bufnr = vim.api.nvim_get_current_buf()
+  local supported_filetypes = config.get('filetype')
 
-  if vim.bo[bufnr].filetype ~= 'markdown' then
-    return vim.api.nvim_notify('Not a markdown file', vim.log.levels.WARN, {})
+  if not vim.tbl_contains(supported_filetypes, vim.bo[bufnr].filetype) then
+    return vim.api.nvim_notify(
+      'Not a supported filetype: ' .. table.concat(supported_filetypes, ','),
+      vim.log.levels.WARN,
+      {}
+    )
   end
 
   open(bufnr)

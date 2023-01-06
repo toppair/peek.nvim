@@ -45,6 +45,7 @@ require('peek').setup({
                             -- amount of bytes in size
   throttle_time = 'auto',   -- minimum amount of time in milliseconds
                             -- that has to pass before starting new render
+  filetype = { 'markdown' } -- supporting filetypes
 })
 ```
 
