@@ -43,10 +43,6 @@ const result = Promise.all([
   }).status(),
 
   Deno.run({
-    cmd: ['deno', 'bundle', ...flags, 'app/src/webview.ts', 'public/webview.js'],
-  }).status(),
-
-  Deno.run({
     cmd: ['deno', 'bundle', ...flags, 'client/src/script.ts', 'public/script.bundle.js'],
   }).status(),
 
