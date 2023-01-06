@@ -1,13 +1,14 @@
 import Mermaid from 'https://cdn.skypack.dev/@types/mermaid?dts';
+import { getInjectConfig } from './util.ts';
 
 declare const mermaid: typeof Mermaid;
 
-const peek = Reflect.get(window, 'peek');
-
 function init() {
+  const peek = getInjectConfig();
+
   mermaid.initialize({
     startOnLoad: false,
-    theme: peek.theme === 'light' ? 'neutral' : 'dark',
+    theme: peek?.theme === 'light' ? 'neutral' : 'dark',
   });
 }
 

@@ -1,5 +1,6 @@
 import { parse } from 'https://deno.land/std@0.159.0/flags/mod.ts';
 import { dirname, join, normalize } from 'https://deno.land/std@0.159.0/path/mod.ts';
+import { open } from 'https://deno.land/x/open@v0.0.5/index.ts';
 import { readChunks } from './read.ts';
 import log from './log.ts';
 import { render } from './markdownit.ts';
@@ -13,23 +14,41 @@ const logger = log.setupLogger();
 
 logger.info(`DENO_ENV: ${DENO_ENV}`, ...Deno.args);
 
-async function awaitConnection(listener: Deno.Listener) {
-  const httpConn = Deno.serveHttp(await listener.accept());
-  const event = (await httpConn.nextRequest())!;
-
-  const { socket, response } = Deno.upgradeWebSocket(event.request);
-
-  event.respondWith(response);
-
-  return socket;
-}
-
 const listener = Deno.listen({ port: 0 });
 const addr = listener.addr as Deno.NetAddr;
+const serverUrl = `${addr.hostname}:${addr.port}`;
+logger.info(`listening on ${serverUrl}`);
 
-logger.info(`listening on ${addr.hostname}:${addr.port}`);
+async function awaitConnection(listener: Deno.Listener) {
+  for await (const conn of listener) {
+    handle(conn);
+  }
+}
 
-awaitConnection(listener).then((socket) => {
+awaitConnection(listener);
+
+async function handle(conn: Deno.Conn) {
+  const httpConn = Deno.serveHttp(conn);
+  for await (const requestEvent of httpConn) {
+    await requestEvent.respondWith(handleReq(requestEvent.request));
+  }
+}
+
+async function handleReq(req: Request): Promise<Response> {
+  const upgrade = req.headers.get('upgrade') || '';
+  if (upgrade.toLowerCase() != 'websocket') {
+    try {
+      const url = new URL(req.url);
+      const pathname = url.pathname === '/' ? 'index.html' : url.pathname.replace(/^\//, '');
+      const filepath = new URL(pathname, Deno.mainModule);
+      const file = await Deno.open(filepath);
+      return new Response(file.readable);
+    } catch (e) {
+      return new Response(e.message, { status: 500 });
+    }
+  }
+
+  const { socket, response } = Deno.upgradeWebSocket(req);
   logger.info('connection');
   socket.onopen = () => {
     (async () => {
@@ -78,33 +97,16 @@ awaitConnection(listener).then((socket) => {
       }
     })();
   };
-});
+  return response;
+}
 
-const webview = Deno.run({
-  cwd: dirname(new URL(Deno.mainModule).pathname),
-  cmd: [
-    'deno',
-    'run',
-    '--quiet',
-    '--allow-read',
-    '--allow-write',
-    '--allow-env',
-    '--allow-net',
-    '--allow-ffi',
-    '--unstable',
-    '--no-check',
-    'webview.js',
-    `--url=${new URL('index.html', Deno.mainModule).href}`,
-    `--theme=${__args['theme']}`,
-    `--serverUrl=${addr.hostname}:${addr.port}`,
-  ],
-  stdin: 'null',
-});
-
-webview.status().then((status) => {
-  logger.info(`webview closed, code: ${status.code}`);
-  Deno.exit();
-});
+const url = new URL(`http://${serverUrl}`);
+const searchParams = new URLSearchParams();
+if (__args.theme) {
+  searchParams.append('theme', __args.theme);
+}
+url.search = searchParams.toString();
+await open(url.href);
 
 for (
   const signal of [

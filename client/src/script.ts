@@ -1,4 +1,4 @@
-import { debounce } from './util.ts';
+import { debounce, getInjectConfig } from './util.ts';
 import { slidingWindows } from 'https://deno.land/std@0.159.0/collections/sliding_windows.ts';
 // @deno-types="https://raw.githubusercontent.com/patrick-steele-idem/morphdom/master/index.d.ts"
 import morphdom from 'https://esm.sh/morphdom@2.6.1?no-dts';
@@ -34,9 +34,9 @@ function setKeybinds() {
 addEventListener('DOMContentLoaded', () => {
   const markdownBody = document.getElementById('markdown-body') as HTMLDivElement;
   const base = document.getElementById('base') as HTMLBaseElement;
-  const peek = Reflect.get(window, 'peek');
+  const peek = getInjectConfig();
 
-  markdownBody.classList.add(peek.theme);
+  if (peek.theme) markdownBody.classList.add(peek.theme);
 
   setKeybinds();
 
