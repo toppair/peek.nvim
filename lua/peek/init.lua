@@ -22,6 +22,7 @@ local function open(bufnr)
 
   app.init(function()
     augroup = nvim_del_augroup_by_id(augroup)
+    module.close()
   end)
   app.base(vim.fn.fnamemodify(vim.uri_to_fname(vim.uri_from_bufnr(bufnr)), ':p:h'))
   app.show(get_buf_content(bufnr))
@@ -112,6 +113,7 @@ end)
 
 module.close = ensure_init(function()
   app.stop()
+  vim.api.nvim_notify('Peek preview stopped.', vim.log.levels.INFO, {})
 end)
 
 module.is_open = ensure_init(function()

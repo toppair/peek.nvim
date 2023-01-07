@@ -33,47 +33,62 @@ awaitConnection(listener).then((socket) => {
   logger.info('connection');
   socket.onopen = () => {
     (async () => {
-      if (DENO_ENV === 'development') {
-        return void (await import(join(__dirname, 'ipc_dev.ts'))).default(socket);
-      }
+      try {
+        if (DENO_ENV === 'development') {
+          return void (await import(join(__dirname, 'ipc_dev.ts'))).default(
+            socket,
+          );
+        }
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
 
-      const encoder = new TextEncoder();
-      const decoder = new TextDecoder();
+        const generator = readChunks(Deno.stdin);
 
-      const generator = readChunks(Deno.stdin);
+        for await (const chunk of generator) {
+          const action = decoder.decode(chunk.buffer);
 
-      for await (const chunk of generator) {
-        const action = decoder.decode(chunk.buffer);
+          switch (action) {
+            case 'show': {
+              const content = decoder.decode((await generator.next()).value!);
 
-        switch (action) {
-          case 'show': {
-            const content = decoder.decode((await generator.next()).value!);
+              socket.send(encoder.encode(JSON.stringify({
+                action: 'show',
+                html: render(content),
+                lcount: (content.match(/(?:\r?\n)/g) || []).length + 1,
+              })));
 
-            socket.send(encoder.encode(JSON.stringify({
-              action: 'show',
-              html: render(content),
-              lcount: (content.match(/(?:\r?\n)/g) || []).length + 1,
-            })));
-
-            break;
+              break;
+            }
+            case 'scroll': {
+              socket.send(encoder.encode(JSON.stringify({
+                action,
+                line: decoder.decode((await generator.next()).value!),
+              })));
+              break;
+            }
+            case 'base': {
+              socket.send(encoder.encode(JSON.stringify({
+                action,
+                base: normalize(
+                  decoder.decode((await generator.next()).value!) + '/',
+                ),
+              })));
+              break;
+            }
+            default: {
+              break;
+            }
           }
-          case 'scroll': {
-            socket.send(encoder.encode(JSON.stringify({
-              action,
-              line: decoder.decode((await generator.next()).value!),
-            })));
-            break;
-          }
-          case 'base': {
-            socket.send(encoder.encode(JSON.stringify({
-              action,
-              base: normalize(decoder.decode((await generator.next()).value!) + '/'),
-            })));
-            break;
-          }
-          default: {
-            break;
-          }
+        }
+      } catch (e) {
+        logger.error({
+          name: e.name,
+          message: e.message,
+        });
+        if (e.name === 'InvalidStateError') {
+          // Once the preview page closed, notify peek Job to stop
+          logger.info('Preview page is likely closed, exit preview job');
+          Deno.exit();
         }
       }
     })();
