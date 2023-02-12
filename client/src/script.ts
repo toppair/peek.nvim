@@ -1,4 +1,4 @@
-import { debounce } from './util.ts';
+import { debounce, getInjectConfig } from './util.ts';
 import { slidingWindows } from 'https://deno.land/std@0.159.0/collections/sliding_windows.ts';
 // @deno-types="https://raw.githubusercontent.com/patrick-steele-idem/morphdom/master/index.d.ts"
 import morphdom from 'https://esm.sh/morphdom@2.6.1?no-dts';
@@ -34,9 +34,9 @@ function setKeybinds() {
 addEventListener('DOMContentLoaded', () => {
   const markdownBody = document.getElementById('markdown-body') as HTMLDivElement;
   const base = document.getElementById('base') as HTMLBaseElement;
-  const peek = Reflect.get(window, 'peek');
+  const peek = getInjectConfig();
 
-  markdownBody.classList.add(peek.theme);
+  if (peek.theme) markdownBody.classList.add(peek.theme);
 
   setKeybinds();
 
@@ -44,10 +44,39 @@ addEventListener('DOMContentLoaded', () => {
   let blocks: HTMLElement[][] | undefined;
   let scroll: { line: number } | undefined;
 
+  onload = () => {
+    const item = sessionStorage.getItem('session');
+    if (item) {
+      const session = JSON.parse(item);
+      base.href = session.base;
+      onPreview({ html: session.html, lcount: session.lcount });
+      onScroll({ line: session.line });
+    }
+  };
+
+  onbeforeunload = () => {
+    sessionStorage.setItem(
+      'session',
+      JSON.stringify({
+        base: base.href,
+        html: markdownBody.innerHTML,
+        lcount: source?.lcount,
+        line: scroll?.line,
+      }),
+    );
+  };
+
   const decoder = new TextDecoder();
   const socket = new WebSocket(`ws://${peek.serverUrl}/`);
 
   socket.binaryType = 'arraybuffer';
+
+  socket.onclose = (event) => {
+    if (!event.wasClean) {
+      close();
+      location.reload();
+    }
+  };
 
   socket.onmessage = (event) => {
     const data = JSON.parse(decoder.decode(event.data));

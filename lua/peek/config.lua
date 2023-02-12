@@ -8,6 +8,7 @@ local config = {
   update_on_change = true,
   throttle_at = 200000,
   throttle_time = 'auto',
+  app = 'webview',
 }
 
 local function optional(predicate)
@@ -35,6 +36,20 @@ local function of_type(t)
   end
 end
 
+local function every(predicate)
+  return function(t)
+    if type(t) ~= 'table' then
+      return
+    end
+    for _, value in pairs(t) do
+      if not predicate(value) then
+        return
+      end
+    end
+    return true
+  end
+end
+
 function module.setup(incoming)
   incoming = incoming or {}
 
@@ -52,6 +67,7 @@ function module.setup(incoming)
     update_in_insert = { incoming.update_in_insert, 'boolean', true },
     throttle_at = { incoming.throttle_at, 'number', true },
     throttle_time = { incoming.throttle_time, optional(one_of({ 'auto', of_type('number') })), '"auto" or number' },
+    app = { incoming.app, optional(one_of({ of_type('string'), every(of_type('string')) })), 'string or string[]' },
   })
 
   if incoming.update_in_insert ~= nil then

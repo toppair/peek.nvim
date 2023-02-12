@@ -100,7 +100,7 @@ md.renderer.rules.fence = (() => {
   const fence = md.renderer.rules.fence!;
   const escapeHtml = md.utils.escapeHtml;
   const regex = new RegExp(
-    /flowchart|sequenceDiagram|gantt|classDiagram|stateDiagram|pie|journey|C4Context|erDiagram|requirementDiagram|gitGraph/,
+    /^(flowchart|sequenceDiagram|gantt|classDiagram|stateDiagram|pie|journey|C4Context|erDiagram|requirementDiagram|gitGraph)/,
   );
 
   return (tokens, idx, options, env, self) => {
