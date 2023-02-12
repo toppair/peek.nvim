@@ -10,16 +10,19 @@ interface Config {
   theme?: string;
   serverUrl?: string;
 }
-export function getInjectConfig(params?: URLSearchParams): Config {
-  const peek: Config = {};
 
-  params = params || new URLSearchParams(location.search);
+export function getInjectConfig(): Config {
+  const peek = Reflect.get(window, 'peek');
 
-  params.forEach((value, key) => {
-    peek[key as keyof Config] = value;
+  if (peek) return peek;
+
+  const params: Config = {};
+
+  new URLSearchParams(location.search).forEach((value, key) => {
+    params[key as keyof Config] = value;
   });
 
-  peek.serverUrl = peek.serverUrl || location.host;
+  params.serverUrl = params.serverUrl || location.host;
 
-  return peek;
+  return params;
 }

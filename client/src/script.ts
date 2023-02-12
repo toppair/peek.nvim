@@ -44,10 +44,39 @@ addEventListener('DOMContentLoaded', () => {
   let blocks: HTMLElement[][] | undefined;
   let scroll: { line: number } | undefined;
 
+  onload = () => {
+    const item = sessionStorage.getItem('session');
+    if (item) {
+      const session = JSON.parse(item);
+      base.href = session.base;
+      onPreview({ html: session.html, lcount: session.lcount });
+      onScroll({ line: session.line });
+    }
+  };
+
+  onbeforeunload = () => {
+    sessionStorage.setItem(
+      'session',
+      JSON.stringify({
+        base: base.href,
+        html: markdownBody.innerHTML,
+        lcount: source?.lcount,
+        line: scroll?.line,
+      }),
+    );
+  };
+
   const decoder = new TextDecoder();
   const socket = new WebSocket(`ws://${peek.serverUrl}/`);
 
   socket.binaryType = 'arraybuffer';
+
+  socket.onclose = (event) => {
+    if (!event.wasClean) {
+      close();
+      location.reload();
+    }
+  };
 
   socket.onmessage = (event) => {
     const data = JSON.parse(decoder.decode(event.data));

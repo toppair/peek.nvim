@@ -37,6 +37,9 @@ require('peek').setup({
 
   update_on_change = true,
 
+  app = 'webview',          -- 'webview', 'browser', string or a table of strings
+                            -- explained below
+
   -- relevant if update_on_change is true
   throttle_at = 200000,     -- start throttling when file exceeds this
                             -- amount of bytes in size
@@ -44,6 +47,18 @@ require('peek').setup({
                             -- that has to pass before starting new render
 })
 ```
+
+### :paperclip: `app` option
+
+Preview opens in a [webview](https://github.com/webview/webview_deno) window by default.
+You can set this option to `'browser'` (will use your default browser as previewer) or
+specify browser along with arguments:
+
+`app = 'chromium'`
+
+`app = { 'chromium', '--new-window' }`
+
+[Chromium based browser](https://en.wikipedia.org/wiki/Chromium_(web_browser)#Browsers_based_on_Chromium) is recommended.
 
 ### :bulb: Usage
 

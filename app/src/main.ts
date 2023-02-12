@@ -16,97 +16,161 @@ logger.info(`DENO_ENV: ${DENO_ENV}`, ...Deno.args);
 
 const listener = Deno.listen({ port: 0 });
 const addr = listener.addr as Deno.NetAddr;
-const serverUrl = `${addr.hostname}:${addr.port}`;
-logger.info(`listening on ${serverUrl}`);
 
-async function awaitConnection(listener: Deno.Listener) {
-  for await (const conn of listener) {
-    handle(conn);
+logger.info(`listening on ${addr.hostname}:${addr.port}`);
+
+async function init(socket: WebSocket) {
+  if (DENO_ENV === 'development') {
+    return void (await import(join(__dirname, 'ipc_dev.ts'))).default(socket);
+  }
+
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+
+  const generator = readChunks(Deno.stdin);
+
+  try {
+    for await (const chunk of generator) {
+      const action = decoder.decode(chunk.buffer);
+
+      switch (action) {
+        case 'show': {
+          const content = decoder.decode((await generator.next()).value!);
+
+          socket.send(encoder.encode(JSON.stringify({
+            action: 'show',
+            html: render(content),
+            lcount: (content.match(/(?:\r?\n)/g) || []).length + 1,
+          })));
+
+          break;
+        }
+        case 'scroll': {
+          socket.send(encoder.encode(JSON.stringify({
+            action,
+            line: decoder.decode((await generator.next()).value!),
+          })));
+          break;
+        }
+        case 'base': {
+          socket.send(encoder.encode(JSON.stringify({
+            action,
+            base: normalize(decoder.decode((await generator.next()).value!) + '/'),
+          })));
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    }
+  } catch (e) {
+    if (e.name !== 'InvalidStateError') throw e;
   }
 }
 
-awaitConnection(listener);
+(async () => {
+  const app = JSON.parse(__args['app']) || 'webview';
 
-async function handle(conn: Deno.Conn) {
-  const httpConn = Deno.serveHttp(conn);
-  for await (const requestEvent of httpConn) {
-    await requestEvent.respondWith(handleReq(requestEvent.request));
+  if (app === 'webview') {
+    const webview = Deno.run({
+      cwd: dirname(new URL(Deno.mainModule).pathname),
+      cmd: [
+        'deno',
+        'run',
+        '--quiet',
+        '--allow-read',
+        '--allow-write',
+        '--allow-env',
+        '--allow-net',
+        '--allow-ffi',
+        '--unstable',
+        '--no-check',
+        'webview.js',
+        `--url=${new URL('index.html', Deno.mainModule).href}`,
+        `--theme=${__args['theme']}`,
+        `--serverUrl=${addr.hostname}:${addr.port}`,
+      ],
+      stdin: 'null',
+    });
+
+    webview.status().then((status) => {
+      logger.info(`webview closed, code: ${status.code}`);
+      Deno.exit();
+    });
+
+    const httpConn = Deno.serveHttp(await listener.accept());
+    const event = (await httpConn.nextRequest())!;
+
+    const { socket, response } = Deno.upgradeWebSocket(event.request);
+
+    socket.onopen = () => {
+      init(socket);
+    };
+
+    return void event.respondWith(response);
   }
-}
 
-async function handleReq(req: Request): Promise<Response> {
-  const upgrade = req.headers.get('upgrade') || '';
-  if (upgrade.toLowerCase() != 'websocket') {
-    try {
-      const url = new URL(req.url);
-      const pathname = url.pathname === '/' ? 'index.html' : url.pathname.replace(/^\//, '');
-      const filepath = new URL(pathname, Deno.mainModule);
-      const file = await Deno.open(filepath);
-      return new Response(file.readable);
-    } catch (e) {
-      return new Response(e.message, { status: 500 });
+  async function findFile(url: string) {
+    const path = new URL(url).pathname.replace(/^\//, '') || 'index.html';
+
+    for (const base of [Deno.mainModule, 'file:']) {
+      try {
+        return await Deno.open(new URL(path, base));
+      } catch (_) { /**/ }
     }
   }
 
-  const { socket, response } = Deno.upgradeWebSocket(req);
-  logger.info('connection');
-  socket.onopen = () => {
-    (async () => {
-      if (DENO_ENV === 'development') {
-        return void (await import(join(__dirname, 'ipc_dev.ts'))).default(socket);
-      }
+  (async () => {
+    let timeout;
 
-      const encoder = new TextEncoder();
-      const decoder = new TextDecoder();
+    for await (const conn of listener) {
+      const httpConn = Deno.serveHttp(conn);
 
-      const generator = readChunks(Deno.stdin);
+      (async () => {
+        for await (const event of httpConn) {
+          const upgrade = event.request.headers.get('upgrade') || '';
 
-      for await (const chunk of generator) {
-        const action = decoder.decode(chunk.buffer);
+          if (upgrade.toLowerCase() != 'websocket') {
+            const file = await findFile(event.request.url);
 
-        switch (action) {
-          case 'show': {
-            const content = decoder.decode((await generator.next()).value!);
+            event.respondWith(
+              new Response(file?.readable || 'Not Found', { status: file ? 200 : 404 }),
+            );
 
-            socket.send(encoder.encode(JSON.stringify({
-              action: 'show',
-              html: render(content),
-              lcount: (content.match(/(?:\r?\n)/g) || []).length + 1,
-            })));
-
-            break;
+            continue;
           }
-          case 'scroll': {
-            socket.send(encoder.encode(JSON.stringify({
-              action,
-              line: decoder.decode((await generator.next()).value!),
-            })));
-            break;
-          }
-          case 'base': {
-            socket.send(encoder.encode(JSON.stringify({
-              action,
-              base: normalize(decoder.decode((await generator.next()).value!) + '/'),
-            })));
-            break;
-          }
-          default: {
-            break;
-          }
+
+          clearTimeout(timeout);
+
+          const { socket, response } = Deno.upgradeWebSocket(event.request);
+
+          socket.onopen = () => {
+            init(socket);
+          };
+
+          socket.onclose = () => {
+            timeout = setTimeout(() => {
+              Deno.exit();
+            }, 2000);
+          };
+
+          event.respondWith(response);
         }
-      }
-    })();
-  };
-  return response;
-}
+      })();
+    }
+  })();
 
-const url = new URL(`http://${serverUrl}`);
-const searchParams = new URLSearchParams();
-if (__args.theme) {
-  searchParams.append('theme', __args.theme);
-}
-url.search = searchParams.toString();
-await open(url.href);
+  const url = new URL(`http://${addr.hostname}:${addr.port}`);
+  const searchParams = new URLSearchParams({ theme: __args.theme });
+  url.search = searchParams.toString();
+
+  open(url.href, { app: app !== 'browser' && app })
+    .catch((e) => {
+      Deno.stderr.writeSync(new TextEncoder().encode(`${[app].flat().join(' ')}: ${e.message}`));
+      Deno.exit();
+    });
+})();
 
 for (
   const signal of [
