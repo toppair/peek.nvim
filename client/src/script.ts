@@ -62,7 +62,7 @@ addEventListener('DOMContentLoaded', () => {
         html: markdownBody.innerHTML,
         lcount: source?.lcount,
         line: scroll?.line,
-      }),
+      })
     );
   };
 
@@ -105,22 +105,27 @@ addEventListener('DOMContentLoaded', () => {
           const svg = await mermaid.render(
             `${el.id}-svg`,
             el.getAttribute('data-graph-definition')!,
-            el,
+            el
           );
 
-          if (svg) el.innerHTML = svg;
-
-          el.parentElement!.style.setProperty(
-            'height',
-            window.getComputedStyle(el.parentElement!).getPropertyValue('height'),
-          );
+          if (svg) {
+            const parser = new DOMParser();
+            const svgElement = parser.parseFromString(svg, 'text/html').body;
+            el.appendChild(svgElement);
+            el.parentElement?.style.setProperty(
+              'height',
+              window.getComputedStyle(svgElement).getPropertyValue('height')
+            );
+          }
         }
 
         return () => {
-          markdownBody.querySelectorAll('div[data-graph="mermaid"]:not(:has(svg))').forEach(render);
+          Array.from(markdownBody.querySelectorAll('div[data-graph="mermaid"]'))
+            .filter((el) => el.querySelectorAll('svg').length === 0)
+            .forEach(render);
         };
       })(),
-      200,
+      200
     );
 
     const morphdomOptions: Parameters<typeof morphdom>[2] = {
@@ -166,17 +171,15 @@ addEventListener('DOMContentLoaded', () => {
 
     return (data: { html: string; lcount: number }) => {
       source = { lcount: data.lcount };
-      morphdom(
-        markdownBody,
-        `<main>${data.html}</main>`,
-        morphdomOptions,
-      );
+      morphdom(markdownBody, `<main>${data.html}</main>`, morphdomOptions);
     };
   })();
 
   const onScroll = (() => {
     function getBlockOnLine(line: number) {
-      return blocks?.findLast((block) => line >= Number(block[0].dataset.lineBegin));
+      const findLast = <T>(array: Array<T> | undefined, predicate: (item: T) => boolean) =>
+        array?.reverse().find(predicate);
+      return findLast(blocks, (block) => line >= Number(block[0].dataset.lineBegin));
     }
 
     function getOffset(elem: HTMLElement): number {
