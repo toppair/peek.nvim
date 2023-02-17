@@ -6,6 +6,10 @@ export function debounce(fn: () => void, millis: number) {
   };
 }
 
+export function findLast<T>(array: Array<T> | undefined, predicate: (item: T) => boolean) {
+  return array?.slice().reverse().find(predicate);
+}
+
 interface Config {
   theme?: string;
   serverUrl?: string;

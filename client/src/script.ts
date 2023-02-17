@@ -1,4 +1,4 @@
-import { debounce, getInjectConfig } from './util.ts';
+import { debounce, findLast, getInjectConfig } from './util.ts';
 import { slidingWindows } from 'https://deno.land/std@0.159.0/collections/sliding_windows.ts';
 // @deno-types="https://raw.githubusercontent.com/patrick-steele-idem/morphdom/master/index.d.ts"
 import morphdom from 'https://esm.sh/morphdom@2.6.1?no-dts';
@@ -62,7 +62,7 @@ addEventListener('DOMContentLoaded', () => {
         html: markdownBody.innerHTML,
         lcount: source?.lcount,
         line: scroll?.line,
-      })
+      }),
     );
   };
 
@@ -101,31 +101,32 @@ addEventListener('DOMContentLoaded', () => {
 
     const renderMermaid = debounce(
       (() => {
+        const parser = new DOMParser();
+
         async function render(el: Element) {
           const svg = await mermaid.render(
             `${el.id}-svg`,
             el.getAttribute('data-graph-definition')!,
-            el
+            el,
           );
 
           if (svg) {
-            const parser = new DOMParser();
             const svgElement = parser.parseFromString(svg, 'text/html').body;
             el.appendChild(svgElement);
             el.parentElement?.style.setProperty(
               'height',
-              window.getComputedStyle(svgElement).getPropertyValue('height')
+              window.getComputedStyle(svgElement).getPropertyValue('height'),
             );
           }
         }
 
         return () => {
           Array.from(markdownBody.querySelectorAll('div[data-graph="mermaid"]'))
-            .filter((el) => el.querySelectorAll('svg').length === 0)
+            .filter((el) => !el.querySelector('svg'))
             .forEach(render);
         };
       })(),
-      200
+      200,
     );
 
     const morphdomOptions: Parameters<typeof morphdom>[2] = {
@@ -177,8 +178,6 @@ addEventListener('DOMContentLoaded', () => {
 
   const onScroll = (() => {
     function getBlockOnLine(line: number) {
-      const findLast = <T>(array: Array<T> | undefined, predicate: (item: T) => boolean) =>
-        array?.reverse().find(predicate);
       return findLast(blocks, (block) => line >= Number(block[0].dataset.lineBegin));
     }
 

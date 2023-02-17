@@ -56,6 +56,15 @@ body::-webkit-scrollbar-thumb {
 .loader::after {
   animation-direction: alternate-reverse;
 }
+.marker {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  top: 50%;
+  left: 5px;
+  border-radius: 50%;
+  background-color: blue;
+}
 div.mermaid {
   margin-top: 0;
   margin-bottom: 16px;
