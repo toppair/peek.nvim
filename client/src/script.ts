@@ -1,4 +1,4 @@
-import { debounce, getInjectConfig } from './util.ts';
+import { debounce, findLast, getInjectConfig } from './util.ts';
 import { slidingWindows } from 'https://deno.land/std@0.159.0/collections/sliding_windows.ts';
 // @deno-types="https://raw.githubusercontent.com/patrick-steele-idem/morphdom/master/index.d.ts"
 import morphdom from 'https://esm.sh/morphdom@2.6.1?no-dts';
@@ -101,6 +101,8 @@ addEventListener('DOMContentLoaded', () => {
 
     const renderMermaid = debounce(
       (() => {
+        const parser = new DOMParser();
+
         async function render(el: Element) {
           const svg = await mermaid.render(
             `${el.id}-svg`,
@@ -108,16 +110,20 @@ addEventListener('DOMContentLoaded', () => {
             el,
           );
 
-          if (svg) el.innerHTML = svg;
-
-          el.parentElement!.style.setProperty(
-            'height',
-            window.getComputedStyle(el.parentElement!).getPropertyValue('height'),
-          );
+          if (svg) {
+            const svgElement = parser.parseFromString(svg, 'text/html').body;
+            el.appendChild(svgElement);
+            el.parentElement?.style.setProperty(
+              'height',
+              window.getComputedStyle(svgElement).getPropertyValue('height'),
+            );
+          }
         }
 
         return () => {
-          markdownBody.querySelectorAll('div[data-graph="mermaid"]:not(:has(svg))').forEach(render);
+          Array.from(markdownBody.querySelectorAll('div[data-graph="mermaid"]'))
+            .filter((el) => !el.querySelector('svg'))
+            .forEach(render);
         };
       })(),
       200,
@@ -166,17 +172,13 @@ addEventListener('DOMContentLoaded', () => {
 
     return (data: { html: string; lcount: number }) => {
       source = { lcount: data.lcount };
-      morphdom(
-        markdownBody,
-        `<main>${data.html}</main>`,
-        morphdomOptions,
-      );
+      morphdom(markdownBody, `<main>${data.html}</main>`, morphdomOptions);
     };
   })();
 
   const onScroll = (() => {
     function getBlockOnLine(line: number) {
-      return blocks?.findLast((block) => line >= Number(block[0].dataset.lineBegin));
+      return findLast(blocks, (block) => line >= Number(block[0].dataset.lineBegin));
     }
 
     function getOffset(elem: HTMLElement): number {
