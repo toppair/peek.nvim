@@ -40,6 +40,8 @@ require('peek').setup({
   app = 'webview',          -- 'webview', 'browser', string or a table of strings
                             -- explained below
 
+  filetype = { 'markdown' } -- list of filetypes to recognize as markdown
+
   -- relevant if update_on_change is true
   throttle_at = 200000,     -- start throttling when file exceeds this
                             -- amount of bytes in size

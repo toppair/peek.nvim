@@ -9,6 +9,7 @@ local config = {
   throttle_at = 200000,
   throttle_time = 'auto',
   app = 'webview',
+  filetype = { 'markdown' },
 }
 
 local function optional(predicate)
@@ -63,22 +64,11 @@ function module.setup(incoming)
     syntax = { incoming.syntax, 'boolean', true },
     theme = { incoming.theme, optional(one_of({ 'dark', 'light' })), '"dark" or "light"' },
     update_on_change = { incoming.update_on_change, 'boolean', true },
-    -- TODO: deprecated, should be removed after sometime
-    update_in_insert = { incoming.update_in_insert, 'boolean', true },
     throttle_at = { incoming.throttle_at, 'number', true },
     throttle_time = { incoming.throttle_time, optional(one_of({ 'auto', of_type('number') })), '"auto" or number' },
     app = { incoming.app, optional(one_of({ of_type('string'), every(of_type('string')) })), 'string or string[]' },
+    filetype = { incoming.filetype, optional(every(of_type('string'))), 'string[]' },
   })
-
-  if incoming.update_in_insert ~= nil then
-    vim.api.nvim_notify(
-      'peek.nvim: the config option update_in_insert has been deprecated, use update_on_change instead.',
-      vim.log.levels.WARN,
-      {}
-    )
-    incoming.update_on_change = incoming.update_in_insert
-    incoming.update_in_insert = nil
-  end
 
   config = vim.tbl_extend('force', config, incoming)
 end

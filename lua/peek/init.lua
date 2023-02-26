@@ -81,11 +81,12 @@ local function open(bufnr)
 
   if config.get('auto_load') then
     nvim_create_autocmd('BufEnter', {
-      pattern = '*.md',
       group = augroup,
       callback = function(arg)
-        show_throttled:clear()
-        open(arg.buf)
+        if vim.tbl_contains(config.get('filetype'), vim.bo[arg.buf].filetype) then
+          show_throttled:clear()
+          open(arg.buf)
+        end
       end,
     })
   end
@@ -102,9 +103,11 @@ end
 
 module.open = ensure_init(function()
   local bufnr = vim.api.nvim_get_current_buf()
+  local filetype = config.get('filetype')
 
-  if vim.bo[bufnr].filetype ~= 'markdown' then
-    return vim.api.nvim_notify('Not a markdown file', vim.log.levels.WARN, {})
+  if not vim.tbl_contains(filetype, vim.bo[bufnr].filetype) then
+    ---@diagnostic disable-next-line: param-type-mismatch
+    return vim.api.nvim_notify('Not a supported filetype: ' .. table.concat(filetype, ', '), vim.log.levels.WARN, {})
   end
 
   open(bufnr)
