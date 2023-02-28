@@ -16,8 +16,9 @@ logger.info(`DENO_ENV: ${DENO_ENV}`, ...Deno.args);
 
 const listener = Deno.listen({ port: 0 });
 const addr = listener.addr as Deno.NetAddr;
+const serverUrl = `${addr.hostname.replace("0.0.0.0", "localhost")}:${addr.port}` 
 
-logger.info(`listening on ${addr.hostname}:${addr.port}`);
+logger.info(`listening on ${serverUrl}`);
 
 async function init(socket: WebSocket) {
   if (DENO_ENV === 'development') {
@@ -89,7 +90,7 @@ async function init(socket: WebSocket) {
         'webview.js',
         `--url=${new URL('index.html', Deno.mainModule).href}`,
         `--theme=${__args['theme']}`,
-        `--serverUrl=${addr.hostname}:${addr.port}`,
+        `--serverUrl=${serverUrl}`,
       ],
       stdin: 'null',
     });
@@ -161,7 +162,7 @@ async function init(socket: WebSocket) {
     }
   })();
 
-  const url = new URL(`http://${addr.hostname}:${addr.port}`);
+  const url = new URL(serverUrl);
   const searchParams = new URLSearchParams({ theme: __args.theme });
   url.search = searchParams.toString();
 
