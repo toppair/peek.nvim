@@ -1,5 +1,5 @@
 import { parse } from 'https://deno.land/std@0.159.0/flags/mod.ts';
-import { dirname, join, normalize } from 'https://deno.land/std@0.159.0/path/mod.ts';
+import { dirname, join, normalize, fromFileUrl } from 'https://deno.land/std@0.159.0/path/mod.ts';
 import { open } from 'https://deno.land/x/open@v0.0.5/index.ts';
 import { readChunks } from './read.ts';
 import log from './log.ts';
@@ -75,7 +75,7 @@ async function init(socket: WebSocket) {
 
   if (app === 'webview') {
     const webview = Deno.run({
-      cwd: dirname(new URL(Deno.mainModule).pathname),
+      cwd: dirname(fromFileUrl(Deno.mainModule)),
       cmd: [
         'deno',
         'run',
