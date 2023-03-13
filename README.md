@@ -18,6 +18,8 @@
 
 ### :electric_plug: Installation
 
+[![LuaRocks](https://img.shields.io/luarocks/v/toppair/peek.nvim?logo=lua&color=purple)](https://luarocks.org/modules/toppair/peek.nvim)
+
 ```lua
 use({ 'toppair/peek.nvim', run = 'deno task --quiet build:fast' })
 ```
