@@ -173,15 +173,12 @@ async function init(socket: WebSocket) {
     });
 })();
 
-for (
-  const signal of [
-    'SIGINT',
-    'SIGUSR2',
-    'SIGTERM',
-    'SIGPIPE',
-    'SIGHUP',
-  ] as const
-) {
+
+const win_signals = ['SIGINT', 'SIGBREAK'] as const;
+const unix_signals = [ 'SIGINT', 'SIGUSR2', 'SIGTERM', 'SIGPIPE', 'SIGHUP' ] as const;
+const signals = Deno.build.os === 'windows' ? win_signals : unix_signals;
+
+for (let signal of signals) {
   Deno.addSignalListener(signal, () => {
     logger.info('SIGNAL: ', signal);
     Deno.exit();
