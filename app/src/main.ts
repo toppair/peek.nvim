@@ -1,5 +1,5 @@
 import { parse } from 'https://deno.land/std@0.159.0/flags/mod.ts';
-import { dirname, join, normalize, fromFileUrl } from 'https://deno.land/std@0.159.0/path/mod.ts';
+import { dirname, fromFileUrl, join, normalize } from 'https://deno.land/std@0.159.0/path/mod.ts';
 import { open } from 'https://deno.land/x/open@v0.0.5/index.ts';
 import { readChunks } from './read.ts';
 import log from './log.ts';
@@ -173,14 +173,13 @@ async function init(socket: WebSocket) {
     });
 })();
 
-
 const win_signals = ['SIGINT', 'SIGBREAK'] as const;
-const unix_signals = [ 'SIGINT', 'SIGUSR2', 'SIGTERM', 'SIGPIPE', 'SIGHUP' ] as const;
+const unix_signals = ['SIGINT', 'SIGUSR2', 'SIGTERM', 'SIGPIPE', 'SIGHUP'] as const;
 const signals = Deno.build.os === 'windows' ? win_signals : unix_signals;
 
-for (let signal of signals) {
+for (const signal of signals) {
   Deno.addSignalListener(signal, () => {
-    logger.info('SIGNAL: ', signal);
+    logger.info('SIGNAL:', signal);
     Deno.exit();
   });
 }
