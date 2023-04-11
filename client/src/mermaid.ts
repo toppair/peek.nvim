@@ -15,7 +15,7 @@ function init() {
 function render(id: string, definition: string, container: Element) {
   return new Promise<string | void>((resolve) => {
     try {
-      mermaid.mermaidAPI.render(id, definition, resolve, container);
+      mermaid.mermaidAPI.render(id, definition, container).then(({ svg }: { svg: string }) => resolve(svg));
     } catch {
       resolve();
     }
