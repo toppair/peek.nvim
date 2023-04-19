@@ -14,11 +14,12 @@ function init() {
 
 function render(id: string, definition: string, container: Element) {
   return new Promise<string | void>((resolve) => {
-    try {
-      mermaid.mermaidAPI.render(id, definition, resolve, container);
-    } catch {
-      resolve();
-    }
+      mermaid.mermaidAPI.render(id, definition).then(({
+        svg, bindFunctions,
+      }: {svg: string; bindFunctions?: (element: Element) => void;}) => {
+          container.innerHTML = svg;
+          bindFunctions?.(container);
+      }).catch(resolve);
   });
 }
 
