@@ -1,3 +1,5 @@
+import { bundle } from 'https://deno.land/x/emit/mod.ts';
+
 const flags = [];
 const DEBUG = Deno.env.get('DEBUG');
 
@@ -37,11 +39,16 @@ if (DEBUG) {
   }).status();
 }
 
-const result = Promise.all([
-  Deno.run({
-    cmd: ['deno', 'bundle', ...flags, 'app/src/main.ts', 'public/main.bundle.js'],
-  }).status(),
+const src = 'app/src';
+const out = 'public';
 
+const url = src + '/main.ts';
+const main_result = await bundle(url);
+const { code } = main_result;
+const main_out_file = out + '/main.bundle.js';
+await Deno.writeTextFile(main_out_file, code);
+
+const result = Promise.all([
   Deno.run({
     cmd: ['deno', 'bundle', ...flags, 'app/src/webview.ts', 'public/webview.js'],
   }).status(),
