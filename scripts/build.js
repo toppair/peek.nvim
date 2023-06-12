@@ -1,4 +1,4 @@
-import { bundle } from 'https://deno.land/x/emit/mod.ts';
+import { bundle } from 'https://deno.land/x/emit@0.24.0/mod.ts';
 
 const flags = [];
 const DEBUG = Deno.env.get('DEBUG');
@@ -39,23 +39,15 @@ if (DEBUG) {
   }).status();
 }
 
-const src = 'app/src';
-const out = 'public';
-
-const url = src + '/main.ts';
-const main_result = await bundle(url);
-const { code } = main_result;
-const main_out_file = out + '/main.bundle.js';
-await Deno.writeTextFile(main_out_file, code);
+async function bundleScript(inFile, outFile) {
+  const bundleResult = await bundle(inFile);
+  await Deno.writeTextFile(outFile, bundleResult.code);
+}
 
 const result = Promise.all([
-  Deno.run({
-    cmd: ['deno', 'bundle', ...flags, 'app/src/webview.ts', 'public/webview.js'],
-  }).status(),
-
-  Deno.run({
-    cmd: ['deno', 'bundle', ...flags, 'client/src/script.ts', 'public/script.bundle.js'],
-  }).status(),
+  bundleScript('app/src/main.ts', 'public/main.bundle.js'),
+  bundleScript('app/src/webview.ts', 'public/webview.js'),
+  bundleScript('client/src/script.ts', 'public/script.bundle.js'),
 
   (async () => {
     try {
