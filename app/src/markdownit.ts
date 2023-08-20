@@ -2,7 +2,7 @@ import { hashCode, uniqueIdGen } from './util.ts';
 import { parse } from 'https://deno.land/std@0.159.0/flags/mod.ts';
 import { default as highlight } from 'https://cdn.skypack.dev/highlight.js@11.6.0';
 // @deno-types="https://cdn.skypack.dev/@types/markdown-it@12.2.3?dts"
-import MarkdownIt from 'https://esm.sh/markdown-it@13.0.1?no-dts';
+import MarkdownIt from 'https://esm.sh/markdown-it@12.3.2';
 // @deno-types="./markdownit_plugin.d.ts"
 import { default as MarkdownItEmoji } from 'https://esm.sh/markdown-it-emoji@2.0.2?no-dts';
 // @deno-types="./markdownit_plugin.d.ts"
