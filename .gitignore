@@ -3,3 +3,4 @@ public/*
 !public/style.css
 .luarc.json
 peek.log
+deno.lock
