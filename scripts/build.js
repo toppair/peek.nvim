@@ -1,9 +1,8 @@
-const flags = [];
-const DEBUG = Deno.env.get('DEBUG');
+import { bundle } from 'https://deno.land/x/emit@0.31.1/mod.ts';
 
-if (Deno.env.get('FAST')) {
-  flags.push('--no-check', '--quiet');
-}
+const DEBUG = Deno.env.get('DEBUG');
+const { compilerOptions, imports } = JSON.parse(Deno.readTextFileSync('deno.json'));
+const bundleOptions = { compilerOptions, importMap: { imports } };
 
 function logPublicContent() {
   console.table(
@@ -29,26 +28,24 @@ function logPublicContent() {
   );
 }
 
+async function emit(src, out) {
+  return Deno.writeTextFile(out, (await bundle(src, bundleOptions)).code);
+}
+
 if (DEBUG) {
   logPublicContent();
 
-  await Deno.run({
-    cmd: ['git', 'branch', '--all'],
-  }).status();
+  new Deno.Command('git', {
+    args: ['branch', '--all'],
+  }).spawn();
 }
 
 const result = Promise.all([
-  Deno.run({
-    cmd: ['deno', 'bundle', ...flags, 'app/src/main.ts', 'public/main.bundle.js'],
-  }).status(),
+  emit('app/src/main.ts', 'public/main.bundle.js'),
 
-  Deno.run({
-    cmd: ['deno', 'bundle', ...flags, 'app/src/webview.ts', 'public/webview.js'],
-  }).status(),
+  emit('app/src/webview.ts', 'public/webview.js'),
 
-  Deno.run({
-    cmd: ['deno', 'bundle', ...flags, 'client/src/script.ts', 'public/script.bundle.js'],
-  }).status(),
+  emit('client/src/script.ts', 'public/script.bundle.js'),
 
   (async () => {
     try {
@@ -67,7 +64,7 @@ const result = Promise.all([
         .replace('}@media (prefers-color-scheme:light){.markdown-body', '.markdown-body.light')
         .replace('--color-danger-fg:#cf222e}', '--color-danger-fg: #cf222e;');
 
-      await Deno.writeFile('public/github-markdown.min.css', new TextEncoder().encode(css));
+      Deno.writeTextFileSync('public/github-markdown.min.css', css);
     }
   })(),
 ]);

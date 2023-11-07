@@ -1,17 +1,13 @@
 import { hashCode, uniqueIdGen } from './util.ts';
 import { parse } from 'https://deno.land/std@0.159.0/flags/mod.ts';
 import { default as highlight } from 'https://cdn.skypack.dev/highlight.js@11.6.0';
-// @deno-types="https://cdn.skypack.dev/@types/markdown-it@12.2.3?dts"
-import MarkdownIt from 'https://esm.sh/markdown-it@13.0.1?no-dts';
-// @deno-types="./markdownit_plugin.d.ts"
-import { default as MarkdownItEmoji } from 'https://esm.sh/markdown-it-emoji@2.0.2?no-dts';
-// @deno-types="./markdownit_plugin.d.ts"
-import { default as MarkdownItFootnote } from 'https://esm.sh/markdown-it-footnote@3.0.3?no-dts';
-// @deno-types="./markdownit_plugin.d.ts"
-import { default as MarkdownItTaskLists } from 'https://esm.sh/markdown-it-task-lists@2.1.1?no-dts';
-// @deno-types="./markdownit_plugin.d.ts"
-import { default as MarkdownItTexmath } from 'https://esm.sh/markdown-it-texmath@1.0.0?no-dts';
-import Katex from 'https://esm.sh/katex@0.16.3?no-dts';
+// @deno-types="https://esm.sh/v133/@types/markdown-it@13.0.5/index.d.ts";
+import MarkdownIt from 'https://esm.sh/markdown-it@13.0.2';
+import { default as MarkdownItEmoji } from 'https://esm.sh/markdown-it-emoji@2.0.2';
+import { default as MarkdownItFootnote } from 'https://esm.sh/markdown-it-footnote@3.0.3';
+import { default as MarkdownItTaskLists } from 'https://esm.sh/markdown-it-task-lists@2.1.1';
+import { default as MarkdownItTexmath } from 'https://esm.sh/markdown-it-texmath@1.0.0';
+import Katex from 'https://esm.sh/katex@0.16.3';
 
 const __args = parse(Deno.args);
 

@@ -14,7 +14,7 @@
 
 ### :battery: Requirements
 
-- [Deno](https://deno.land) v1.25.0+
+- [Deno](https://deno.land)
 
 ### :electric_plug: Installation
 

@@ -11,6 +11,9 @@
   "compilerOptions": {
     "lib": ["dom", "deno.ns", "deno.unstable"]
   },
+  "imports": {
+    "node:punycode": "https://deno.land/x/punycode/punycode.js"
+  },
   "fmt": {
     "options": {
       "useTabs": false,
