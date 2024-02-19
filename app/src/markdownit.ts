@@ -96,7 +96,7 @@ md.renderer.rules.fence = (() => {
   const fence = md.renderer.rules.fence!;
   const escapeHtml = md.utils.escapeHtml;
   const regex = new RegExp(
-    /^(flowchart|sequenceDiagram|gantt|classDiagram|stateDiagram|pie|journey|C4Context|erDiagram|requirementDiagram|gitGraph)/,
+    /^(?<frontmatter>---[\s\S]+---)?\s*(?<content>(?<charttype>flowchart|sequenceDiagram|gantt|classDiagram|stateDiagram|pie|journey|C4Context|erDiagram|requirementDiagram|gitGraph)[\s\S]+)/
   );
 
   return (tokens, idx, options, env, self) => {
@@ -104,6 +104,7 @@ md.renderer.rules.fence = (() => {
     const content = token.content.trim();
 
     if (regex.test(content)) {
+      const match = regex.exec(content);
       return `
         <div
           class="mermaid"
@@ -112,7 +113,7 @@ md.renderer.rules.fence = (() => {
           <div
             id="graph-mermaid-${env.genId(hashCode(content))}"
             data-graph="mermaid"
-            data-graph-definition="${escapeHtml(content)}"
+            data-graph-definition="${escapeHtml(match?.groups?.content || '')}"
           >
             <div class="loader"></div>
           </div>
