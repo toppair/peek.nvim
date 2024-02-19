@@ -12,14 +12,10 @@ function init() {
   });
 }
 
-function render(id: string, definition: string, container: Element) {
-  return new Promise<string | void>((resolve) => {
-    try {
-      mermaid.mermaidAPI.render(id, definition, resolve, container);
-    } catch {
-      resolve();
-    }
-  });
+async function render(id: string, definition: string, container: Element) {
+  try {
+    return (await mermaid.render(id, definition, container)).svg;
+  } catch { /**/ }
 }
 
 export default { init, render };
