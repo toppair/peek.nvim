@@ -1,15 +1,15 @@
 import { hashCode, uniqueIdGen } from './util.ts';
-import { parse } from 'https://deno.land/std@0.159.0/flags/mod.ts';
-import { default as highlight } from 'https://cdn.skypack.dev/highlight.js@11.6.0';
-// @deno-types="https://esm.sh/v133/@types/markdown-it@13.0.5/index.d.ts";
-import MarkdownIt from 'https://esm.sh/markdown-it@13.0.2';
-import { default as MarkdownItEmoji } from 'https://esm.sh/markdown-it-emoji@2.0.2';
-import { default as MarkdownItFootnote } from 'https://esm.sh/markdown-it-footnote@3.0.3';
+import { parseArgs } from 'https://deno.land/std@0.217.0/cli/parse_args.ts';
+import { default as highlight } from 'https://cdn.skypack.dev/highlight.js@11.9.0';
+// @deno-types="https://esm.sh/v135/@types/markdown-it@13.0.7/index.d.ts";
+import MarkdownIt from 'https://esm.sh/markdown-it@14.0.0';
+import { full as MarkdownItEmoji } from 'https://esm.sh/markdown-it-emoji@3.0.0';
+import { default as MarkdownItFootnote } from 'https://esm.sh/markdown-it-footnote@4.0.0';
 import { default as MarkdownItTaskLists } from 'https://esm.sh/markdown-it-task-lists@2.1.1';
 import { default as MarkdownItTexmath } from 'https://esm.sh/markdown-it-texmath@1.0.0';
-import Katex from 'https://esm.sh/katex@0.16.3';
+import Katex from 'https://esm.sh/katex@0.16.9';
 
-const __args = parse(Deno.args);
+const __args = parseArgs(Deno.args);
 
 const md = new MarkdownIt('default', {
   html: true,
@@ -96,7 +96,7 @@ md.renderer.rules.fence = (() => {
   const fence = md.renderer.rules.fence!;
   const escapeHtml = md.utils.escapeHtml;
   const regex = new RegExp(
-    /^(?<frontmatter>---[\s\S]+---)?\s*(?<content>(?<charttype>flowchart|sequenceDiagram|gantt|classDiagram|stateDiagram|pie|journey|C4Context|erDiagram|requirementDiagram|gitGraph)[\s\S]+)/
+    /^(?<frontmatter>---[\s\S]+---)?\s*(?<content>(?<charttype>flowchart|sequenceDiagram|gantt|classDiagram|stateDiagram|pie|journey|C4Context|erDiagram|requirementDiagram|gitGraph)[\s\S]+)/,
   );
 
   return (tokens, idx, options, env, self) => {

@@ -1,11 +1,11 @@
-import { parse } from 'https://deno.land/std@0.159.0/flags/mod.ts';
-import { dirname, fromFileUrl, join, normalize } from 'https://deno.land/std@0.159.0/path/mod.ts';
-import { open } from 'https://deno.land/x/open@v0.0.5/index.ts';
+import { parseArgs } from 'https://deno.land/std@0.217.0/cli/parse_args.ts';
+import { dirname, fromFileUrl, join, normalize } from 'https://deno.land/std@0.217.0/path/mod.ts';
+import { open } from 'https://deno.land/x/open@v0.0.6/index.ts';
 import { readChunks } from './read.ts';
 import log from './log.ts';
 import { render } from './markdownit.ts';
 
-const __args = parse(Deno.args);
+const __args = parseArgs(Deno.args);
 const __dirname = dirname(new URL(import.meta.url).pathname);
 
 const DENO_ENV = Deno.env.get('DENO_ENV');
@@ -13,12 +13,6 @@ const DENO_ENV = Deno.env.get('DENO_ENV');
 const logger = log.setupLogger();
 
 logger.info(`DENO_ENV: ${DENO_ENV}`, ...Deno.args);
-
-const listener = Deno.listen({ port: 0 });
-const addr = listener.addr as Deno.NetAddr;
-const serverUrl = `${addr.hostname.replace('0.0.0.0', 'localhost')}:${addr.port}`;
-
-logger.info(`listening on ${serverUrl}`);
 
 async function init(socket: WebSocket) {
   if (DENO_ENV === 'development') {
@@ -70,46 +64,50 @@ async function init(socket: WebSocket) {
   }
 }
 
-(async () => {
+(() => {
   const app = JSON.parse(__args['app']) || 'webview';
 
   if (app === 'webview') {
-    const webview = Deno.run({
-      cwd: dirname(fromFileUrl(Deno.mainModule)),
-      cmd: [
-        'deno',
-        'run',
-        '--quiet',
-        '--allow-read',
-        '--allow-write',
-        '--allow-env',
-        '--allow-net',
-        '--allow-ffi',
-        '--unstable',
-        '--no-check',
-        'webview.js',
-        `--url=${new URL('index.html', Deno.mainModule).href}`,
-        `--theme=${__args['theme']}`,
-        `--serverUrl=${serverUrl}`,
-      ],
-      stdin: 'null',
-    });
+    const onListen: Deno.ServeOptions['onListen'] = ({ hostname, port }) => {
+      const serverUrl = `${hostname.replace('0.0.0.0', 'localhost')}:${port}`;
+      logger.info(`listening on ${serverUrl}`);
+      const webview = new Deno.Command('deno', {
+        cwd: dirname(fromFileUrl(Deno.mainModule)),
+        args: [
+          'run',
+          '--quiet',
+          '--allow-read',
+          '--allow-write',
+          '--allow-env',
+          '--allow-net',
+          '--allow-ffi',
+          '--unstable',
+          '--no-check',
+          'webview.js',
+          `--url=${new URL('index.html', Deno.mainModule).href}`,
+          `--theme=${__args['theme']}`,
+          `--serverUrl=${serverUrl}`,
+        ],
+        stdin: 'null',
+      });
 
-    webview.status().then((status) => {
-      logger.info(`webview closed, code: ${status.code}`);
-      Deno.exit();
-    });
-
-    const httpConn = Deno.serveHttp(await listener.accept());
-    const event = (await httpConn.nextRequest())!;
-
-    const { socket, response } = Deno.upgradeWebSocket(event.request);
-
-    socket.onopen = () => {
-      init(socket);
+      webview.output().then((status) => {
+        logger.info(`webview closed, code: ${status.code}`);
+        Deno.exit();
+      });
     };
 
-    return void event.respondWith(response);
+    Deno.serve({ port: 0, onListen }, (request) => {
+      const { socket, response } = Deno.upgradeWebSocket(request);
+
+      socket.onopen = () => {
+        init(socket);
+      };
+
+      return response;
+    });
+
+    return;
   }
 
   async function findFile(url: string) {
@@ -122,55 +120,46 @@ async function init(socket: WebSocket) {
     }
   }
 
-  (async () => {
-    let timeout;
+  const onListen: Deno.ServeOptions['onListen'] = ({ hostname, port }) => {
+    const serverUrl = `${hostname.replace('0.0.0.0', 'localhost')}:${port}`;
+    logger.info(`listening on ${serverUrl}`);
+    const url = new URL(`http://${serverUrl}`);
+    const searchParams = new URLSearchParams({ theme: __args.theme });
+    url.search = searchParams.toString();
 
-    for await (const conn of listener) {
-      const httpConn = Deno.serveHttp(conn);
+    open(url.href, { app: app !== 'browser' && app })
+      .catch((e) => {
+        Deno.stderr.writeSync(new TextEncoder().encode(`${[app].flat().join(' ')}: ${e.message}`));
+        Deno.exit();
+      });
+  };
 
-      (async () => {
-        for await (const event of httpConn) {
-          const upgrade = event.request.headers.get('upgrade') || '';
+  let timeout: number;
 
-          if (upgrade.toLowerCase() != 'websocket') {
-            const file = await findFile(event.request.url);
+  Deno.serve({ port: 0, onListen }, async (request) => {
+    const upgrade = request.headers.get('upgrade') || '';
 
-            event.respondWith(
-              new Response(file?.readable || 'Not Found', { status: file ? 200 : 404 }),
-            );
-
-            continue;
-          }
-
-          clearTimeout(timeout);
-
-          const { socket, response } = Deno.upgradeWebSocket(event.request);
-
-          socket.onopen = () => {
-            init(socket);
-          };
-
-          socket.onclose = () => {
-            timeout = setTimeout(() => {
-              Deno.exit();
-            }, 2000);
-          };
-
-          event.respondWith(response);
-        }
-      })();
+    if (upgrade.toLowerCase() != 'websocket') {
+      const file = await findFile(request.url);
+      return new Response(file?.readable || 'Not Found', { status: file ? 200 : 404 });
     }
-  })();
 
-  const url = new URL(`http://${serverUrl}`);
-  const searchParams = new URLSearchParams({ theme: __args.theme });
-  url.search = searchParams.toString();
+    clearTimeout(timeout);
 
-  open(url.href, { app: app !== 'browser' && app })
-    .catch((e) => {
-      Deno.stderr.writeSync(new TextEncoder().encode(`${[app].flat().join(' ')}: ${e.message}`));
-      Deno.exit();
-    });
+    const { socket, response } = Deno.upgradeWebSocket(request);
+
+    socket.onopen = () => {
+      init(socket);
+    };
+
+    socket.onclose = () => {
+      timeout = setTimeout(() => {
+        Deno.exit();
+      }, 2000);
+    };
+
+    return response;
+  });
 })();
 
 const win_signals = ['SIGINT', 'SIGBREAK'] as const;

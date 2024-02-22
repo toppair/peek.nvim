@@ -1,9 +1,13 @@
-import { parse } from 'https://deno.land/std@0.159.0/flags/mod.ts';
-import { dirname, join, normalize } from 'https://deno.land/std@0.159.0/path/mod.ts';
-import { getLogger, LogRecord, setup } from 'https://deno.land/std@0.159.0/log/mod.ts';
-import { RotatingFileHandler } from 'https://deno.land/std@0.159.0/log/handlers.ts';
+import { parseArgs } from 'https://deno.land/std@0.217.0/cli/parse_args.ts';
+import { dirname, join, normalize } from 'https://deno.land/std@0.217.0/path/mod.ts';
+import {
+  getLogger,
+  LogRecord,
+  RotatingFileHandler,
+  setup,
+} from 'https://deno.land/std@0.217.0/log/mod.ts';
 
-const __args = parse(Deno.args);
+const __args = parseArgs(Deno.args);
 
 const logfile = __args['logfile']
   ? normalize(__args['logfile'])

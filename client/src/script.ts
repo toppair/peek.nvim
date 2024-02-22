@@ -1,9 +1,10 @@
 import { debounce, findLast, getInjectConfig } from './util.ts';
-import { slidingWindows } from 'https://deno.land/std@0.159.0/collections/sliding_windows.ts';
+import { slidingWindows } from 'https://deno.land/std@0.217.0/collections/sliding_windows.ts';
 // @deno-types="https://raw.githubusercontent.com/patrick-steele-idem/morphdom/master/index.d.ts"
-import morphdom from 'https://esm.sh/morphdom@2.6.1?no-dts';
+import morphdom from 'https://esm.sh/morphdom@2.7.2?no-dts';
 import mermaid from './mermaid.ts';
 
+const window = globalThis;
 // const _log = Reflect.get(window, '_log');
 
 function setKeybinds() {
