@@ -11,8 +11,10 @@ const __dirname = dirname(new URL(import.meta.url).pathname);
 const DENO_ENV = Deno.env.get('DENO_ENV');
 
 const logger = log.setupLogger();
+const version = Deno.version;
 
 logger.info(`DENO_ENV: ${DENO_ENV}`, ...Deno.args);
+logger.info(`deno: ${version.deno} v8: ${version.v8} typescript: ${version.typescript}`);
 
 async function init(socket: WebSocket) {
   if (DENO_ENV === 'development') {
@@ -65,7 +67,7 @@ async function init(socket: WebSocket) {
 }
 
 (() => {
-  const app = JSON.parse(__args['app']) || 'webview';
+  const app = __args['app'] ? JSON.parse(__args['app']) : 'webview';
 
   if (app === 'webview') {
     const onListen: Deno.ServeOptions['onListen'] = ({ hostname, port }) => {
