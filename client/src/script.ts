@@ -37,7 +37,7 @@ addEventListener('DOMContentLoaded', () => {
   const base = document.getElementById('base') as HTMLBaseElement;
   const peek = getInjectConfig();
 
-  if (peek.theme) markdownBody.classList.add(peek.theme);
+  if (peek.theme) document.body.setAttribute('data-theme', peek.theme);
 
   setKeybinds();
 

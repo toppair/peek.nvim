@@ -33,7 +33,11 @@ const md = new MarkdownIt('default', {
   .use(MarkdownItTexmath, {
     engine: Katex,
     delimiters: ['gitlab', 'dollars'],
-    katexOptions: { macros: { '\\R': '\\mathbb{R}' } },
+    katexOptions: {
+      macros: { '\\R': '\\mathbb{R}' },
+      strict: false,
+      throwOnError: false,
+    },
   });
 
 md.renderer.rules.link_open = (tokens, idx, options) => {
