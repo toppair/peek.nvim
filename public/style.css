@@ -162,3 +162,15 @@ div[data-graph='mermaid']:has(> .loader) {
   color: var(--color-prettylights-syntax-markup-deleted-text);
   background-color: var(--color-prettylights-syntax-markup-deleted-bg);
 }
+#zoom-level {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: rgba(150, 150, 150, 0.7);
+  color: #fff;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  z-index: 9999;
+}

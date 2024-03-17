@@ -28,9 +28,47 @@ function setKeybinds() {
       case 'G':
         window.scrollTo({ top: document.body.scrollHeight });
         break;
+      case '+':
+        zoom.up();
+        break;
+      case '-':
+        zoom.down();
+        break;
+      case '*':
+        zoom.reset();
+        break;
     }
   });
 }
+
+const zoom = {
+  level: 1,
+  zoomMin: 0.5,
+  zoomMax: 2.5,
+  zoomStep: 0.1,
+  zoomLabel: document.getElementById('zoom-level') as HTMLDivElement,
+  up() {
+    this.level = Math.min(this.level + this.zoomStep, this.zoomMax);
+    this.update();
+  },
+  down() {
+    this.level = Math.max(this.level - this.zoomStep, this.zoomMin);
+    this.update();
+  },
+  reset() {
+    this.level = 1; 
+    this.update();
+  },
+  update() {
+    document.body.style.setProperty('zoom', this.level.toString());
+    this.zoomLabel.textContent = `${(this.level * 100).toFixed(0)}%`;
+    this.zoomLabel.style.setProperty('zoom', (1 / this.level).toString());
+    if (this.zoomLabel.style.visibility === 'hidden') {
+      this.zoomLabel.style.visibility = 'visible';
+      setTimeout(() => (this.zoomLabel.style.visibility = 'hidden'), 1000);
+    }
+  },
+};
 
 addEventListener('DOMContentLoaded', () => {
   const markdownBody = document.getElementById('markdown-body') as HTMLDivElement;
