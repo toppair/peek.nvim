@@ -56,7 +56,7 @@ const zoom = {
     this.update();
   },
   reset() {
-    this.level = 1; 
+    this.level = 1;
     this.update();
   },
   update() {
