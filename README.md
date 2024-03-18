@@ -98,6 +98,9 @@ The following keybinds are active when preview window is focused:
 | d | scroll down half a page |
 | g | scroll to top           |
 | G | scroll to bottom        |
+| + | zoom in by 10%          |
+| - | zoom out by 10%         |
+| * | zoom reset to 100%      |
 
 ### :mag: Preview window
 
