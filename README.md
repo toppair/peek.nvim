@@ -94,8 +94,8 @@ The following keybinds are active when preview window is focused:
 | --- | ----------------------- |
 | k   | scroll up               |
 | j   | scroll down             |
-| l   | scroll left             |
-| h   | scroll right            |
+| l   | scroll right            |
+| h   | scroll left             |
 | u   | scroll up half a page   |
 | d   | scroll down half a page |
 | g   | scroll to top           |
