@@ -247,8 +247,8 @@ addEventListener('DOMContentLoaded', () => {
       const target = block[0];
       const next = target ? block[1] : blocks[0][0];
 
-      const offsetBegin = target ? getOffset(target) : 0;
-      const offsetEnd = next ? getOffset(next) : markdownBody.scrollHeight;
+      const offsetBegin = (target ? getOffset(target) : 0) * zoom.level;
+      const offsetEnd = (next ? getOffset(next) : markdownBody.scrollHeight) * zoom.level;
 
       const lineBegin = target ? Number(target.dataset.lineBegin) : 1;
       const lineEnd = next ? Number(next.dataset.lineBegin) : source.lcount + 1;
