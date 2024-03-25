@@ -90,17 +90,19 @@ vim.api.nvim_create_user_command('PeekClose', require('peek').close, {})
 
 The following keybinds are active when preview window is focused:
 
-| key ||
-|-|-|
-| k | scroll up               |
-| j | scroll down             |
-| u | scroll up half a page   |
-| d | scroll down half a page |
-| g | scroll to top           |
-| G | scroll to bottom        |
-| + | zoom in by 10%          |
-| - | zoom out by 10%         |
-| * | zoom reset to 100%      |
+| key |                         |
+| --- | ----------------------- |
+| k   | scroll up               |
+| j   | scroll down             |
+| l   | scroll left             |
+| h   | scroll right            |
+| u   | scroll up half a page   |
+| d   | scroll down half a page |
+| g   | scroll to top           |
+| G   | scroll to bottom        |
+| +   | zoom in by 10%          |
+| -   | zoom out by 10%         |
+| \*  | zoom reset to 100%      |
 
 ### :mag: Preview window
 
