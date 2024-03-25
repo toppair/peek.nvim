@@ -32,7 +32,7 @@ function setKeybinds() {
         window.scrollTo({ top: 0 });
         break;
       case 'G':
-        window.scrollTo({ top: document.body.scrollHeight });
+        window.scrollTo({ top: document.body.scrollHeight * zoom.level });
         break;
       case '+':
         zoom.up();
