@@ -16,6 +16,12 @@ function setKeybinds() {
       case 'k':
         window.scrollBy({ top: -50 });
         break;
+      case 'l':
+        window.scrollBy({ left: 50 });
+        break;
+      case 'h':
+        window.scrollBy({ left: -50 });
+        break;
       case 'd':
         window.scrollBy({ top: window.innerHeight / 2 });
         break;
