@@ -55,6 +55,7 @@ addEventListener('DOMContentLoaded', () => {
   if (peek.ctx === 'webview') zoom.init();
 
   document.addEventListener('keydown', (event: KeyboardEvent) => {
+    event.preventDefault();
     if (peek.ctx === 'webview' && event.ctrlKey) {
       switch (event.key) {
         case '=':
@@ -75,12 +76,6 @@ addEventListener('DOMContentLoaded', () => {
       case 'k':
         window.scrollBy({ top: -50 });
         break;
-      case 'l':
-        window.scrollBy({ left: 50 });
-        break;
-      case 'h':
-        window.scrollBy({ left: -50 });
-        break;
       case 'd':
         window.scrollBy({ top: window.innerHeight / 2 });
         break;
@@ -91,7 +86,7 @@ addEventListener('DOMContentLoaded', () => {
         window.scrollTo({ top: 0 });
         break;
       case 'G':
-        window.scrollTo({ top: document.body.scrollHeight * zoom.level });
+        window.scrollTo({ top: document.body.scrollHeight });
         break;
     }
   });
