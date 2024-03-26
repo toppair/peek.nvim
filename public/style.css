@@ -1,10 +1,6 @@
 html {
   background: #333;
 }
-body {
-  margin: 0;
-  padding: 0;
-}
 body::-webkit-scrollbar {
   width: 4px;
 }
@@ -14,6 +10,10 @@ body::-webkit-scrollbar-track {
 body::-webkit-scrollbar-thumb {
   background-color: #555;
 }
+.peek-body {
+  margin: 0;
+  padding: 0;
+}
 .markdown-body {
   box-sizing: border-box;
   min-width: 200px;
@@ -21,6 +21,7 @@ body::-webkit-scrollbar-thumb {
   margin: 0 auto;
   padding: 45px;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 @media (max-width: 767px) {
   .markdown-body {
@@ -35,7 +36,7 @@ body::-webkit-scrollbar-thumb {
     scale: 1;
   }
 }
-.loader {
+.peek-loader {
   position: absolute;
   display: flex;
   width: 40px;
@@ -44,8 +45,8 @@ body::-webkit-scrollbar-thumb {
   justify-content: space-between;
   translate: -50% -50%;
 }
-.loader::before,
-.loader::after {
+.peek-loader::before,
+.peek-loader::after {
   content: '';
   width: 10px;
   height: 10px;
@@ -53,10 +54,10 @@ body::-webkit-scrollbar-thumb {
   background-color: blue;
   animation: 0.5s linear infinite alternate pulse;
 }
-.loader::after {
+.peek-loader::after {
   animation-direction: alternate-reverse;
 }
-.marker {
+.peek-marker {
   position: fixed;
   width: 4px;
   height: 4px;
@@ -65,7 +66,7 @@ body::-webkit-scrollbar-thumb {
   border-radius: 50%;
   background-color: blue;
 }
-div.mermaid {
+.peek-mermaid-container {
   margin-top: 0;
   margin-bottom: 16px;
   padding: 16px;
@@ -73,17 +74,39 @@ div.mermaid {
   overflow: auto;
   line-height: 1.45;
   font-size: 85%;
-  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    SF Mono,
+    Menlo,
+    Consolas,
+    Liberation Mono,
+    monospace;
   word-wrap: normal;
   background-color: var(--color-canvas-subtle);
 }
-div.mermaid:has(svg) {
+.peek-mermaid-container:has(svg) {
   height: auto !important;
 }
-div[data-graph='mermaid']:has(> .loader) {
+div[data-graph='mermaid']:has(> .peek-loader) {
   position: relative;
   height: 100%;
   min-height: 50px;
+}
+#peek-zoom-label {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  padding: 10px;
+  opacity: 0;
+  border-radius: 8px;
+  background-color: rgba(100, 100, 100, 0.7);
+  color: #fff;
+  text-shadow: 1px 1px 2px #000;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 9999;
 }
 .hljs-doctag,
 .hljs-keyword,

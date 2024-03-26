@@ -9,6 +9,9 @@ function init() {
   mermaid.initialize({
     startOnLoad: false,
     theme: peek?.theme === 'light' ? 'neutral' : 'dark',
+    flowchart: {
+      htmlLabels: false,
+    },
   });
 }
 

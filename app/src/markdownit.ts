@@ -111,7 +111,7 @@ md.renderer.rules.fence = (() => {
       const match = regex.exec(content);
       return `
         <div
-          class="mermaid"
+          class="peek-mermaid-container"
           data-line-begin="${token.attrGet('data-line-begin')}"
         >
           <div
@@ -119,7 +119,7 @@ md.renderer.rules.fence = (() => {
             data-graph="mermaid"
             data-graph-definition="${escapeHtml(match?.groups?.content || '')}"
           >
-            <div class="loader"></div>
+            <div class="peek-loader"></div>
           </div>
         </div>
       `;
