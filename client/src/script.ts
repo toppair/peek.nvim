@@ -7,8 +7,67 @@ import mermaid from './mermaid.ts';
 const window = globalThis;
 // const _log = Reflect.get(window, '_log');
 
-function setKeybinds() {
+addEventListener('DOMContentLoaded', () => {
+  const body = document.body;
+  const markdownBody = document.getElementById('peek-markdown-body') as HTMLDivElement;
+  const base = document.getElementById('peek-base') as HTMLBaseElement;
+  const peek = getInjectConfig();
+  let source: { lcount: number } | undefined;
+  let blocks: HTMLElement[][] | undefined;
+  let scroll: { line: number } | undefined;
+
+  const zoom = {
+    level: 100,
+    zoomMin: 50,
+    zoomMax: 250,
+    zoomStep: 10,
+    zoomLabel: document.getElementById('peek-zoom-label') as HTMLDivElement,
+    init() {
+      this.level = Number(localStorage.getItem('zoom-level')) || this.level;
+      this.update(this.level === 100);
+    },
+    up() {
+      this.level = Math.min(this.level + this.zoomStep, this.zoomMax);
+      this.update();
+    },
+    down() {
+      this.level = Math.max(this.level - this.zoomStep, this.zoomMin);
+      this.update();
+    },
+    reset() {
+      this.level = 100;
+      this.update();
+    },
+    update(silent?: boolean) {
+      localStorage.setItem('zoom-level', String(this.level));
+      markdownBody.style.setProperty('font-size', `${this.level}%`);
+      if (silent) return;
+      this.zoomLabel.textContent = `${this.level}%`;
+      this.zoomLabel.animate([
+        { opacity: 1 },
+        { opacity: 1, offset: 0.75 },
+        { opacity: 0 },
+      ], { duration: 1000 });
+    },
+  };
+
+  if (peek.theme) body.setAttribute('data-theme', peek.theme);
+  if (peek.ctx === 'webview') zoom.init();
+
   document.addEventListener('keydown', (event: KeyboardEvent) => {
+    if (peek.ctx === 'webview' && event.ctrlKey) {
+      switch (event.key) {
+        case '=':
+          zoom.up();
+          return;
+        case '-':
+          zoom.down();
+          return;
+        case '0':
+          zoom.reset();
+          return;
+      }
+    }
     switch (event.key) {
       case 'j':
         window.scrollBy({ top: 50 });
@@ -34,60 +93,8 @@ function setKeybinds() {
       case 'G':
         window.scrollTo({ top: document.body.scrollHeight * zoom.level });
         break;
-      case '+':
-        zoom.up();
-        break;
-      case '-':
-        zoom.down();
-        break;
-      case '*':
-        zoom.reset();
-        break;
     }
   });
-}
-
-const zoom = {
-  level: 1,
-  zoomMin: 0.5,
-  zoomMax: 2.5,
-  zoomStep: 0.1,
-  zoomLabel: document.getElementById('zoom-level') as HTMLDivElement,
-  up() {
-    this.level = Math.min(this.level + this.zoomStep, this.zoomMax);
-    this.update();
-  },
-  down() {
-    this.level = Math.max(this.level - this.zoomStep, this.zoomMin);
-    this.update();
-  },
-  reset() {
-    this.level = 1;
-    this.update();
-  },
-  update() {
-    document.body.style.setProperty('zoom', this.level.toString());
-    this.zoomLabel.textContent = `${(this.level * 100).toFixed(0)}%`;
-    this.zoomLabel.style.setProperty('zoom', (1 / this.level).toString());
-    if (this.zoomLabel.style.visibility === 'hidden') {
-      this.zoomLabel.style.visibility = 'visible';
-      setTimeout(() => (this.zoomLabel.style.visibility = 'hidden'), 1000);
-    }
-  },
-};
-
-addEventListener('DOMContentLoaded', () => {
-  const markdownBody = document.getElementById('markdown-body') as HTMLDivElement;
-  const base = document.getElementById('base') as HTMLBaseElement;
-  const peek = getInjectConfig();
-
-  if (peek.theme) document.body.setAttribute('data-theme', peek.theme);
-
-  setKeybinds();
-
-  let source: { lcount: number } | undefined;
-  let blocks: HTMLElement[][] | undefined;
-  let scroll: { line: number } | undefined;
 
   onload = () => {
     const item = sessionStorage.getItem('session');
@@ -191,7 +198,10 @@ addEventListener('DOMContentLoaded', () => {
       onBeforeElUpdated: (fromEl: HTMLElement, toEl: HTMLElement) => {
         if (fromEl.hasAttribute('open')) {
           toEl.setAttribute('open', 'true');
-        } else if (fromEl.classList.contains('mermaid') && toEl.classList.contains('mermaid')) {
+        } else if (
+          fromEl.classList.contains('peek-mermaid-container') &&
+          toEl.classList.contains('peek-mermaid-container')
+        ) {
           toEl.style.height = fromEl.style.height;
         }
         return !fromEl.isEqualNode(toEl);
@@ -241,14 +251,16 @@ addEventListener('DOMContentLoaded', () => {
     return (data: { line: number }) => {
       scroll = data;
 
-      if (!blocks || !source) return;
+      if (!blocks || !blocks[0] || !source) return;
 
       const block = getBlockOnLine(data.line) || blocks[0];
       const target = block[0];
       const next = target ? block[1] : blocks[0][0];
 
-      const offsetBegin = (target ? getOffset(target) : 0) * zoom.level;
-      const offsetEnd = (next ? getOffset(next) : markdownBody.scrollHeight) * zoom.level;
+      const offsetBegin = target ? getOffset(target) : 0;
+      const offsetEnd = next
+        ? getOffset(next)
+        : offsetBegin + target.getBoundingClientRect().height;
 
       const lineBegin = target ? Number(target.dataset.lineBegin) : 1;
       const lineEnd = next ? Number(next.dataset.lineBegin) : source.lcount + 1;

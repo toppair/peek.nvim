@@ -10,13 +10,13 @@
   <link href="style.css" rel="stylesheet" />
 </head>
 
-<body data-theme="dark">
-  <base id="base" />
-  <div id="zoom-level" style='visibility: hidden;'></div>
-  <main id="markdown-body" class="markdown-body">
-    <div class="loader"></div>
+<body class="peek-body" data-theme="dark">
+  <base id="peek-base" />
+  <main id="peek-markdown-body" class="markdown-body">
+    <div class="peek-loader"></div>
   </main>
-  <div class="marker"></div>
+  <div class="peek-marker"></div>
+  <div id="peek-zoom-label"></div>
   <script src="mermaid.min.js"></script>
   <script src="script.bundle.js"></script>
 </body>

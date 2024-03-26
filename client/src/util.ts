@@ -13,12 +13,13 @@ export function findLast<T>(array: Array<T> | undefined, predicate: (item: T) =>
 interface Config {
   theme?: string;
   serverUrl?: string;
+  ctx?: string;
 }
 
 export function getInjectConfig(): Config {
   const peek = Reflect.get(window, 'peek');
 
-  if (peek) return peek;
+  if (peek) return { ctx: 'webview', ...peek };
 
   const params: Config = {};
 
@@ -27,6 +28,7 @@ export function getInjectConfig(): Config {
   });
 
   params.serverUrl = params.serverUrl || location.host;
+  params.ctx = 'browser';
 
   return params;
 }
