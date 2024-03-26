@@ -55,39 +55,35 @@ addEventListener('DOMContentLoaded', () => {
   if (peek.ctx === 'webview') zoom.init();
 
   document.addEventListener('keydown', (event: KeyboardEvent) => {
-    event.preventDefault();
-    if (peek.ctx === 'webview' && event.ctrlKey) {
-      switch (event.key) {
-        case '=':
-          zoom.up();
-          return;
-        case '-':
-          zoom.down();
-          return;
-        case '0':
-          zoom.reset();
-          return;
-      }
-    }
-    switch (event.key) {
-      case 'j':
+    const ctrl: Record<string, () => void> = {
+      '=': zoom.up.bind(zoom),
+      '-': zoom.down.bind(zoom),
+      '0': zoom.reset.bind(zoom),
+    };
+    const plain: Record<string, () => void> = {
+      'j': () => {
         window.scrollBy({ top: 50 });
-        break;
-      case 'k':
+      },
+      'k': () => {
         window.scrollBy({ top: -50 });
-        break;
-      case 'd':
+      },
+      'd': () => {
         window.scrollBy({ top: window.innerHeight / 2 });
-        break;
-      case 'u':
+      },
+      'u': () => {
         window.scrollBy({ top: -window.innerHeight / 2 });
-        break;
-      case 'g':
+      },
+      'g': () => {
         window.scrollTo({ top: 0 });
-        break;
-      case 'G':
+      },
+      'G': () => {
         window.scrollTo({ top: document.body.scrollHeight });
-        break;
+      },
+    };
+    const action = event.ctrlKey && peek.ctx === 'webview' ? ctrl[event.key] : plain[event.key];
+    if (action) {
+      event.preventDefault();
+      action();
     }
   });
 
