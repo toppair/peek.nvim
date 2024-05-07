@@ -7,6 +7,7 @@ import { full as MarkdownItEmoji } from 'https://esm.sh/markdown-it-emoji@3.0.0'
 import { default as MarkdownItFootnote } from 'https://esm.sh/markdown-it-footnote@4.0.0';
 import { default as MarkdownItTaskLists } from 'https://esm.sh/markdown-it-task-lists@2.1.1';
 import { default as MarkdownItTexmath } from 'https://esm.sh/markdown-it-texmath@1.0.0';
+import { markdownItFancyListPlugin as MardownItFancyLists } from 'https://esm.sh/markdown-it-fancy-lists@1.3.0';
 import Katex from 'https://esm.sh/katex@0.16.9';
 
 const __args = parseArgs(Deno.args);
@@ -28,6 +29,7 @@ const md = new MarkdownIt('default', {
     return '';
   }),
 }).use(MarkdownItEmoji)
+  .use(MardownItFancyLists)
   .use(MarkdownItFootnote)
   .use(MarkdownItTaskLists, { enabled: false, label: true })
   .use(MarkdownItTexmath, {
