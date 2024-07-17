@@ -1,0 +1,171 @@
+:root {
+  --color-red: #fb464c;
+  --color-orange: #e9973f;
+  --color-yellow: #e0de71;
+  --color-green: #44cf6e;
+  --color-cyan: #53dfdd;
+  --color-blue: #316dca;
+  --color-purple: #a882ff;
+  --color-pink: #fa99cd;
+  --color-gray: #9e9e9e;
+  --base-size-8: 0.5rem;
+  --base-size-16: 1rem;
+  --base-text-weight-medium: 500;
+  --borderColor-default: #444c56;
+  --callout-bug: var(--color-red);
+  --callout-default: var(--color-blue);
+  --callout-note: var(--color-blue);
+  --callout-error: var(--color-red);
+  --callout-example: var(--color-purple);
+  --callout-failure: var(--color-red);
+  --callout-important: var(--color-cyan);
+  --callout-info: var(--color-blue);
+  --callout-question: var(--color-orange);
+  --callout-success: var(--color-green);
+  --callout-abstract: var(--color-cyan);
+  --callout-tip: var(--color-cyan);
+  --callout-todo: var(--color-blue);
+  --callout-warning: var(--color-orange);
+  --callout-quote: var(--color-gray);
+}
+
+.callout {
+  padding: var(--base-size-8) var(--base-size-16);
+  margin-bottom: var(--base-size-16);
+  color: inherit;
+  border-left: .25em solid var(--borderColor-default, var(--color-border-default));
+}
+
+.callout>:last-child {
+  margin-bottom: 0;
+}
+
+.callout-title {
+  display: flex;
+  font-weight: var(--base-text-weight-medium, 500);
+  align-items: center;
+  line-height: 1;
+}
+
+.callout-title-icon {
+  margin-right: var(--base-size-8, 8px) !important;
+}
+
+.callout[data-callout="note"] {
+  border-left-color: var(--callout-note);
+}
+.callout[data-callout="note"] > .callout-title {
+  color: var(--callout-note);
+}
+
+.callout[data-callout="info"] {
+  border-left-color: var(--callout-info);
+}
+.callout[data-callout="info"] > .callout-title {
+  color: var(--callout-info);
+}
+
+.callout[data-callout="todo"] {
+  border-left-color: var(--callout-todo);
+}
+.callout[data-callout="todo"] > .callout-title {
+  color: var(--callout-todo);
+}
+
+.callout[data-callout="abstract"],
+.callout[data-callout="tldr"],
+.callout[data-callout="summary"] {
+  border-left-color: var(--callout-abstract);
+}
+.callout[data-callout="abstract"] > .callout-title,
+.callout[data-callout="tldr"] > .callout-title,
+.callout[data-callout="summary"] > .callout-title  {
+  color: var(--callout-abstract);
+}
+
+.callout[data-callout="tip"],
+.callout[data-callout="hint"],
+.callout[data-callout="important"] {
+  border-left-color: var(--callout-tip);
+}
+.callout[data-callout="tip"] > .callout-title,
+.callout[data-callout="hint"] > .callout-title,
+.callout[data-callout="important"] > .callout-title {
+  color: var(--callout-tip);
+}
+
+.callout[data-callout="success"],
+.callout[data-callout="check"],
+.callout[data-callout="done"] {
+  border-left-color: var(--callout-success);
+}
+.callout[data-callout="success"] > .callout-title,
+.callout[data-callout="check"] > .callout-title,
+.callout[data-callout="done"] > .callout-title {
+  color: var(--callout-success);
+}
+
+.callout[data-callout="question"],
+.callout[data-callout="help"],
+.callout[data-callout="faq"] {
+  border-left-color: var(--callout-question);
+}
+.callout[data-callout="question"] > .callout-title,
+.callout[data-callout="help"] > .callout-title,
+.callout[data-callout="faq"] > .callout-title {
+  color: var(--callout-question);
+}
+
+.callout[data-callout="warning"],
+.callout[data-callout="caution"],
+.callout[data-callout="attention"] {
+  border-left-color: var(--callout-warning);
+}
+.callout[data-callout="warning"] > .callout-title,
+.callout[data-callout="caution"] > .callout-title,
+.callout[data-callout="attention"] > .callout-title {
+  color: var(--callout-warning);
+}
+
+.callout[data-callout="failure"],
+.callout[data-callout="fail"],
+.callout[data-callout="missing"] {
+  border-left-color: var(--callout-failure);
+}
+.callout[data-callout="failure"] > .callout-title,
+.callout[data-callout="fail"] > .callout-title,
+.callout[data-callout="missing"] > .callout-title {
+  color: var(--callout-failure);
+}
+
+.callout[data-callout="danger"],
+.callout[data-callout="error"] {
+  border-left-color: var(--callout-error);
+}
+.callout[data-callout="danger"] > .callout-title,
+.callout[data-callout="error"] > .callout-title {
+  color: var(--callout-error);
+}
+
+.callout[data-callout="bug"] {
+  border-left-color: var(--callout-bug);
+}
+.callout[data-callout="bug"] > .callout-title {
+  color: var(--callout-bug);
+}
+
+.callout[data-callout="example"] {
+  border-left-color: var(--callout-example);
+}
+.callout[data-callout="example"] > .callout-title {
+  color: var(--callout-example);
+}
+
+.callout[data-callout="quote"],
+.callout[data-callout="cite"] {
+  border-left-color: var(--callout-quote);
+}
+.callout[data-callout="quote"] > .callout-title,
+.callout[data-callout="cite"] > .callout-title {
+  color: var(--callout-quote);
+}
