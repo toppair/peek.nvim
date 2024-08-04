@@ -10,6 +10,7 @@ import { default as MarkdownItTexmath } from 'https://esm.sh/markdown-it-texmath
 import Katex from 'https://esm.sh/katex@0.16.9';
 
 const __args = parseArgs(Deno.args);
+const app = __args['app'] ? JSON.parse(__args['app']) : 'webview';
 
 const md = new MarkdownIt('default', {
   html: true,
@@ -44,11 +45,13 @@ md.renderer.rules.link_open = (tokens, idx, options) => {
   const token = tokens[idx];
   const href = token.attrGet('href');
 
-  if (href && href.startsWith('#')) {
+  if (href?.startsWith('#')) {
     token.attrSet('onclick', `location.hash='${href}'`);
+    token.attrSet('href', 'javascript:return');
+  } else {
+    const link = app === 'webview' ? 'javascript:return' : href;
+    token.attrSet('href', link || 'javascript:return');
   }
-
-  token.attrSet('href', 'javascript:return');
 
   return md.renderer.renderToken(tokens, idx, options);
 };
