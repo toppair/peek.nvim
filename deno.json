@@ -1,6 +1,7 @@
 {
   "tasks": {
     "build": "deno run --allow-run --allow-net --allow-read --allow-write --allow-env --no-check scripts/build.js",
+    "build:insecure": "deno run --allow-run --allow-net --allow-read --allow-write --allow-env --no-check --unsafely-ignore-certificate-errors scripts/build.js",
     "build:watch": "deno task build --watch",
     "build:fast": "FAST=true deno task --quiet build",
     "build:debug": "DEBUG=true deno task build",
