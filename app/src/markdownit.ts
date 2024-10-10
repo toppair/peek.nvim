@@ -48,7 +48,20 @@ md.renderer.rules.link_open = (tokens, idx, options) => {
     token.attrSet('onclick', `location.hash='${href}'`);
   }
 
-  token.attrSet('href', 'javascript:return');
+  // Use a fallback method to copy text to clipboard
+  token.attrSet(
+    'href',
+    `javascript:(function(t) {
+  var e = document.createElement('textarea');
+  e.value = t;
+  document.body.appendChild(e);
+  e.select();
+  try {
+    document.execCommand('copy'); alert('Link copied!');
+  } catch (r) { console.error('Copy failed', r); }
+  document.body.removeChild(e);
+})(${JSON.stringify(href)});`,
+  );
 
   return md.renderer.renderToken(tokens, idx, options);
 };
