@@ -5,6 +5,7 @@ local config = {
   close_on_bdelete = true,
   syntax = true,
   theme = 'dark',
+  auto_os_theme = false,
   update_on_change = true,
   throttle_at = 200000,
   throttle_time = 'auto',

@@ -17,7 +17,8 @@ local function get_buf_content(bufnr)
   return concat(nvim_buf_get_lines(bufnr, 0, -1, false), '\n'):gsub('%s*$', '')
 end
 
-local function open(bufnr)
+local function open(bufnr, cfg)
+  app.setup(cfg)
   augroup = nvim_create_augroup('PeekActiveAugroup', { clear = true })
 
   app.init(function()
