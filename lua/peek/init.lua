@@ -14,7 +14,12 @@ local module = {}
 local augroup, throttle_at, throttle_time, initialized
 
 local function get_buf_content(bufnr)
-  return concat(nvim_buf_get_lines(bufnr, 0, -1, false), '\n'):gsub('%s*$', '')
+  local content = concat(nvim_buf_get_lines(bufnr, 0, -1, false), '\n'):gsub('%s*$', '')
+  local user_style = config.get('user_style')
+  if user_style ~= nil then
+    content = concat({"<style>", user_style , "</style>\n", content})
+  end
+  return content
 end
 
 local function open(bufnr)
