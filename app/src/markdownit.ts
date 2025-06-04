@@ -7,6 +7,7 @@ import { full as MarkdownItEmoji } from 'https://esm.sh/markdown-it-emoji@3.0.0'
 import { default as MarkdownItFootnote } from 'https://esm.sh/markdown-it-footnote@4.0.0';
 import { default as MarkdownItTaskLists } from 'https://esm.sh/markdown-it-task-lists@2.1.1';
 import { default as MarkdownItTexmath } from 'https://esm.sh/markdown-it-texmath@1.0.0';
+import { default as MarkdownItGitHubAlerts } from 'https://esm.sh/markdown-it-github-alerts@1.0.0';
 import Katex from 'https://esm.sh/katex@0.16.9';
 
 const __args = parseArgs(Deno.args);
@@ -38,7 +39,8 @@ const md = new MarkdownIt('default', {
       strict: false,
       throwOnError: false,
     },
-  });
+  })
+  .use(MarkdownItGitHubAlerts);
 
 md.renderer.rules.link_open = (tokens, idx, options) => {
   const token = tokens[idx];

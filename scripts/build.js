@@ -57,7 +57,7 @@ const result = await Promise.allSettled([
   emit('client/src/script.ts', 'public/script.bundle.js'),
 
   download(
-    'https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown.min.css',
+    'https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown.min.css',
     'public/github-markdown.min.css',
     (uint8array) => {
       return new TextEncoder().encode(
