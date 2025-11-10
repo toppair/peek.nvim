@@ -69,7 +69,7 @@ const result = await Promise.allSettled([
   ),
 
   download(
-    'https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js',
+    'https://cdn.jsdelivr.net/npm/mermaid@11.12.0/dist/mermaid.min.js',
     'public/mermaid.min.js',
   ),
 
