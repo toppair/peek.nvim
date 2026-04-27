@@ -1,6 +1,6 @@
-import { parseArgs } from 'https://deno.land/std@0.217.0/cli/parse_args.ts';
-import { dirname, fromFileUrl, join, normalize } from 'https://deno.land/std@0.217.0/path/mod.ts';
-import { open } from 'https://deno.land/x/open@v0.0.6/index.ts';
+import { parseArgs } from '@std/cli';
+import { dirname, fromFileUrl, join, normalize } from '@std/path';
+import { open } from 'openView';
 import { readChunks } from './read.ts';
 import log from './log.ts';
 import { render } from './markdownit.ts';

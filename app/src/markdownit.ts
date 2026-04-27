@@ -1,13 +1,15 @@
 import { hashCode, uniqueIdGen } from './util.ts';
-import { parseArgs } from 'https://deno.land/std@0.217.0/cli/parse_args.ts';
-import { default as highlight } from 'https://cdn.skypack.dev/highlight.js@11.9.0';
-// @deno-types="https://esm.sh/v135/@types/markdown-it@13.0.7/index.d.ts";
-import MarkdownIt from 'https://esm.sh/markdown-it@14.0.0';
-import { full as MarkdownItEmoji } from 'https://esm.sh/markdown-it-emoji@3.0.0';
-import { default as MarkdownItFootnote } from 'https://esm.sh/markdown-it-footnote@4.0.0';
-import { default as MarkdownItTaskLists } from 'https://esm.sh/markdown-it-task-lists@2.1.1';
-import { default as MarkdownItTexmath } from 'https://esm.sh/markdown-it-texmath@1.0.0';
-import Katex from 'https://esm.sh/katex@0.16.9';
+import { parseArgs } from '@std/cli';
+import { default as highlight } from 'highlightJs';
+// @deno-types="https://esm.sh/v135/@types/markdown-it@14.1.1/index.d.ts";
+import MarkdownIt from 'markdown-it';
+import { full as MarkdownItEmoji } from 'markdown-it-emoji';
+import { default as MarkdownItFootnote } from 'markdown-it-footnote';
+import { default as MarkdownItTaskLists } from 'markdown-it-task-lists';
+import { default as MarkdownItTexmath } from 'markdown-it-texmath';
+import { markdownItFancyListPlugin as MarkdownItFancyLists } from 'markdown-it-fancy-lists';
+import { default as MarkdownItGitHubAlerts } from 'markdown-github-alerts';
+import Katex from 'katex';
 
 const __args = parseArgs(Deno.args);
 
@@ -16,18 +18,22 @@ const md = new MarkdownIt('default', {
   typographer: true,
   linkify: true,
   langPrefix: 'language-',
-  highlight: __args['syntax'] && ((code, language) => {
-    if (language && highlight.getLanguage(language)) {
-      try {
-        return highlight.highlight(code, { language }).value;
-      } catch {
-        return code;
+  breaks: true,
+  highlight: __args['syntax'] &&
+    ((code, language) => {
+      if (language && highlight.getLanguage(language)) {
+        try {
+          return highlight.highlight(code, { language }).value;
+        } catch {
+          return code;
+        }
       }
-    }
 
-    return '';
-  }),
-}).use(MarkdownItEmoji)
+      return '';
+    }),
+})
+  .use(MarkdownItEmoji)
+  .use(MarkdownItFancyLists)
   .use(MarkdownItFootnote)
   .use(MarkdownItTaskLists, { enabled: false, label: true })
   .use(MarkdownItTexmath, {
@@ -38,7 +44,8 @@ const md = new MarkdownIt('default', {
       strict: false,
       throwOnError: false,
     },
-  });
+  })
+  .use(MarkdownItGitHubAlerts);
 
 md.renderer.rules.link_open = (tokens, idx, options) => {
   const token = tokens[idx];
@@ -100,7 +107,7 @@ md.renderer.rules.fence = (() => {
   const fence = md.renderer.rules.fence!;
   const escapeHtml = md.utils.escapeHtml;
   const regex = new RegExp(
-    /^(?<frontmatter>---[\s\S]+---)?\s*(?<content>(?<charttype>flowchart|sequenceDiagram|gantt|classDiagram|stateDiagram|pie|journey|C4Context|erDiagram|requirementDiagram|gitGraph)[\s\S]+)/,
+    /^(?<frontmatter>---[\s\S]+---)?\s*(?<content>(?<charttype>flowchart|sequenceDiagram|gantt|classDiagram|stateDiagram|pie|journey|C4Context|erDiagram|requirementDiagram|gitGraph|graph)[\s\S]+)/,
   );
 
   return (tokens, idx, options, env, self) => {

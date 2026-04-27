@@ -1,7 +1,7 @@
 import { debounce, findLast, getInjectConfig } from './util.ts';
-import { slidingWindows } from 'https://deno.land/std@0.217.0/collections/sliding_windows.ts';
+import { slidingWindows } from '@std/collections';
 // @deno-types="https://raw.githubusercontent.com/patrick-steele-idem/morphdom/master/index.d.ts"
-import morphdom from 'https://esm.sh/morphdom@2.7.2?no-dts';
+import morphdom from 'morphdom';
 import mermaid from './mermaid.ts';
 
 const window = globalThis;

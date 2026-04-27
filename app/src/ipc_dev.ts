@@ -1,14 +1,20 @@
-import { readLines } from 'https://deno.land/std@0.159.0/io/buffer.ts';
-import { normalize } from 'https://deno.land/std@0.159.0/path/mod.ts';
+import { TextLineStream } from '@std/streams';
+import { normalize } from '@std/path';
 import { render } from './markdownit.ts';
 
 export default async function (socket: WebSocket) {
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
 
-  for await (const line of readLines(Deno.stdin)) {
-    const [action, ...args] = line.split(':');
+  const readable = Deno.stdin.readable
+    .pipeThrough(new TextDecoderStream())
+    .pipeThrough(new TextLineStream());
 
+  const reader = readable.getReader();
+  while (true) {
+    const { value, done } = await reader.read();
+    if (!value) break;
+    const [action, ...args] = value?.split(':');
     switch (action) {
       case 'show':
         try {
@@ -39,5 +45,6 @@ export default async function (socket: WebSocket) {
       default:
         break;
     }
+    if (done) break;
   }
 }

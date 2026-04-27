@@ -1,7 +1,7 @@
-import Mermaid from 'https://cdn.skypack.dev/@types/mermaid?dts';
+import type { Mermaid } from 'mermaid';
 import { getInjectConfig } from './util.ts';
 
-declare const mermaid: typeof Mermaid;
+declare const mermaid: Mermaid;
 
 function init() {
   const peek = getInjectConfig();
