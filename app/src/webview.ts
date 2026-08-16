@@ -1,4 +1,4 @@
-import { Webview } from 'https://deno.land/x/webview@0.7.6/mod.ts';
+import { Webview } from 'jsr:@webview/webview@0.9.0';
 import { parseArgs } from 'https://deno.land/std@0.217.0/cli/parse_args.ts';
 
 const { url, theme, serverUrl } = parseArgs(Deno.args);

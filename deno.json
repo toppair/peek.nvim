@@ -12,6 +12,7 @@
     "lib": ["dom", "deno.ns", "deno.unstable"]
   },
   "imports": {
+    "@webview/webview": "jsr:@webview/webview@^0.9.0",
     "node:punycode": "https://deno.land/x/punycode/punycode.js"
   },
   "fmt": {
